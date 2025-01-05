@@ -68,8 +68,24 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
         reloadCellBars(val.v_cells.size());
     }
 
+    double vcMin = 0.0;
+    double vcMax = 0.0;
+
+    if (val.v_cells.size() > 0) {
+        vcMin = val.v_cells.first();
+        vcMax = vcMin;
+    }
+
     QSharedPointer<QCPAxisTickerText> textTicker(new QCPAxisTickerText);
     for (int i = 0;i < val.v_cells.size();i++) {
+        if (val.v_cells.at(i) > vcMax) {
+            vcMax = val.v_cells.at(i);
+        }
+
+        if (val.v_cells.at(i) < vcMin) {
+            vcMin = val.v_cells.at(i);
+        }
+
         QVector<double> cell, voltage;
         cell.append(i + 1);
         voltage.append(val.v_cells.at(i));
@@ -93,45 +109,63 @@ void PageBms::bmsValuesRx(BMS_VALUES val)
         ui->tempPlot->unload();
     }
 
-    if (mTempBars.size() != (val.temps.size() + 1)) {
-        reloadTempBars(val.temps.size() + 1);
+    if (mTempBars.size() != (val.temps.size())) {
+        reloadTempBars(val.temps.size());
+    }
+
+    QStringList tLabels;
+    if (val.data_version == 1) {
+        tLabels.append({"IC", "Cell Min", "Cell Max", "Mosfet", "Ambient"});
     }
 
     QSharedPointer<QCPAxisTickerText> textTicker2(new QCPAxisTickerText);
-    val.temps.prepend(val.temp_ic);
+
+    int labelInd = 1;
     for (int i = 0;i < val.temps.size();i++) {
         double t = val.temps.at(i);
+
         QVector<double> sensor, temp;
         sensor.append(i + 1);
-        temp.append(t);
+        temp.append(t > -280.0 ? t : 0.0);
         mTempBars.at(i)->setData(sensor, temp);
         mTempBars.at(i)->setBrush(t > 55 ? Utility::getAppQColor("red") : Utility::getAppQColor("blue"));
 
-        textTicker2->addTick(i + 1, QString("T%1 (%2 °C)").
-                            arg(i + 1).arg(t));
+        QString tempTxt = QString("(%1 °C)").arg(t);
+        if (t <= -280.0) {
+            tempTxt = "(N/A)";
+        }
+        if (i < tLabels.size()) {
+            textTicker2->addTick(i + 1, QString("%1 %2").arg(tLabels.at(i)).arg(tempTxt));
+        } else {
+            textTicker2->addTick(i + 1, QString("T%1 %2").arg(labelInd++).arg(tempTxt));
+        }
     }
 
     ui->plotTemp->xAxis->setTicker(textTicker2);
     ui->plotTemp->replotWhenVisible();
 
     // Value table
-    ui->valTable->item(0, 0)->setText(QString("%1 V").arg(val.v_tot, 0, 'f', 2));
-    ui->valTable->item(1, 0)->setText(QString("%1 V").arg(val.v_charge, 0, 'f', 2));
-    ui->valTable->item(2, 0)->setText(QString("%1 A").arg(val.i_in, 0, 'f', 2));
-    ui->valTable->item(3, 0)->setText(QString("%1 A").arg(val.i_in_ic, 0, 'f', 2));
-    ui->valTable->item(4, 0)->setText(QString("%1 Ah").arg(val.ah_cnt, 0, 'f', 3));
-    ui->valTable->item(5, 0)->setText(QString("%1 Wh").arg(val.wh_cnt, 0, 'f', 3));
-    ui->valTable->item(6, 0)->setText(QString("%1 W").arg(val.i_in_ic * val.v_tot, 0, 'f', 3));
-    ui->valTable->item(7, 0)->setText(QString("%1 %").arg(val.soc * 100.0, 0, 'f', 0));
-    ui->valTable->item(8, 0)->setText(QString("%1 %").arg(val.soh * 100.0, 0, 'f', 0));
-    ui->valTable->item(9, 0)->setText(QString("%1 °C").arg(val.temp_cells_highest, 0, 'f', 2));
-    ui->valTable->item(10, 0)->setText(QString("%1 %").arg(val.humidity, 0, 'f', 2));
-    ui->valTable->item(11, 0)->setText(QString("%1 Pa").arg(val.pressure, 0, 'f', 0));
-    ui->valTable->item(12, 0)->setText(QString("%1 °C").arg(val.temp_hum_sensor, 0, 'f', 2));
-    ui->valTable->item(13, 0)->setText(QString("%1 Ah").arg(val.ah_cnt_chg_total, 0, 'f', 3));
-    ui->valTable->item(14, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_chg_total, 0, 'f', 3));
-    ui->valTable->item(15, 0)->setText(QString("%1 Ah").arg(val.ah_cnt_dis_total, 0, 'f', 3));
-    ui->valTable->item(16, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_dis_total, 0, 'f', 3));
+    int ind = 0;
+    ui->valTable->item(ind++, 0)->setText(QString("%1 V").arg(val.v_tot, 0, 'f', 2));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 V").arg(vcMin, 0, 'f', 3));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 V").arg(vcMax, 0, 'f', 3));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 V").arg(vcMax - vcMin, 0, 'f', 3));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 V").arg(val.v_charge, 0, 'f', 2));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 A").arg(val.i_in, 0, 'f', 2));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 A").arg(val.i_in_ic, 0, 'f', 2));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 Ah").arg(val.ah_cnt, 0, 'f', 3));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 Wh").arg(val.wh_cnt, 0, 'f', 3));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 W").arg(val.i_in_ic * val.v_tot, 0, 'f', 3));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 %").arg(val.soc * 100.0, 0, 'f', 0));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 %").arg(val.soh * 100.0, 0, 'f', 0));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 °C").arg(val.temp_cells_highest, 0, 'f', 2));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 %").arg(val.humidity, 0, 'f', 2));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 Pa").arg(val.pressure, 0, 'f', 0));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 °C").arg(val.temp_hum_sensor, 0, 'f', 2));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 Ah").arg(val.ah_cnt_chg_total, 0, 'f', 3));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_chg_total, 0, 'f', 3));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 Ah").arg(val.ah_cnt_dis_total, 0, 'f', 3));
+    ui->valTable->item(ind++, 0)->setText(QString("%1 Wh").arg(val.wh_cnt_dis_total, 0, 'f', 3));
 }
 
 void PageBms::reloadCellBars(int cells)

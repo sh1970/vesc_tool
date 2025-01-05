@@ -37,10 +37,12 @@ public:
     explicit PageLisp(QWidget *parent = nullptr);
     ~PageLisp();
 
+    void saveStateToSettings();
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
     void reloadParams();
     bool hasUnsavedTabs();
+    void disablePolling();
 
 private slots:
     void on_openRecentButton_clicked();

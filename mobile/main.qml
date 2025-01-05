@@ -129,7 +129,7 @@ ApplicationWindow {
                 anchors.fill: parent
             }
 
-            onOpened: {
+            onVisibleChanged: {
                 if (visible) {
                     canScreen.scanIfEmpty()
                 }
@@ -308,6 +308,8 @@ ApplicationWindow {
         }
 
         Page {
+            id: rtDataPage
+
             PageIndicator {
                 count: rtSwipeView.count
                 currentIndex: rtSwipeView.currentIndex
@@ -439,6 +441,7 @@ ApplicationWindow {
         }
 
         Page {
+            id: bmsPage
             Loader {
                 anchors.fill: parent
                 asynchronous: true
@@ -631,7 +634,7 @@ ApplicationWindow {
                     GradientStop { position: 0.0; color: "#15ffffff"}
                     GradientStop { position: 0.3; color: "#04ffffff"}
                     GradientStop { position: 1.0; color: "transparent" }
-                }
+            }
         }
         Behavior on color {
             ColorAnimation {
@@ -823,33 +826,33 @@ ApplicationWindow {
                     mCommands.getValuesSetup()
                     mCommands.getImuData(0xFFFF)
 
-                    if (tabBar.currentIndex == (3 + indexOffset())) {
+                    if (swipeView.currentItem == bmsPage) {
                         mCommands.bmsGetValues()
                     }
                 } else {
-                    if ((tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 0)) {
+                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 0) {
                         interval = 50
                         mCommands.getValues()
                     }
 
-                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 1) {
+                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 1) {
                         interval = 50
                         mCommands.getValuesSetup()
                         mCommands.getImuData(0x2)
                     }
 
-                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 2) {
+                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 2) {
                         interval = 20
                         mCommands.getImuData(0x1FF)
                     }
 
-                    if (tabBar.currentIndex == (1 + indexOffset()) && rtSwipeView.currentIndex == 3) {
+                    if (swipeView.currentItem == rtDataPage && rtSwipeView.currentIndex == 3) {
                         interval = 100
                         mCommands.getValuesSetupSelective(0x7E00)
                         mCommands.getStats(0xFFFFFFFF)
                     }
 
-                    if (tabBar.currentIndex == (3 + indexOffset())) {
+                    if (swipeView.currentItem == bmsPage) {
                         interval = 100
                         mCommands.bmsGetValues()
                     }
@@ -988,18 +991,33 @@ ApplicationWindow {
         }
     }
 
-    function updateConfCustom () {
-        if (VescIf.isPortConnected() && VescIf.customConfig(0) !== null) {
-            swipeView.insertItem(4, confCustomPage)
-            tabBar.insertItem(4, confCustomButton)
-            confCustomPage.visible = true
-            confCustomLoader.item.reloadConfig()
-            confCustomButton.text = VescIf.customConfig(0).getLongName("hw_name")
-        } else {
-            confCustomPage.visible = false
-            confCustomPage.parent = null
-            confCustomButton.parent = null
+    Timer {
+        id: confCustomTimer
+        running: false
+        triggeredOnStart: true
+        interval: 500
+        repeat: true
+        onTriggered: {
+            if (confCustomLoader.status == Loader.Ready) {
+                stop()
+
+                if (VescIf.isPortConnected() && VescIf.customConfig(0) !== null) {
+                    swipeView.insertItem(4, confCustomPage)
+                    tabBar.insertItem(4, confCustomButton)
+                    confCustomPage.visible = true
+                    confCustomLoader.item.reloadConfig()
+                    confCustomButton.text = VescIf.customConfig(0).getLongName("hw_name")
+                } else {
+                    confCustomPage.visible = false
+                    confCustomPage.parent = null
+                    confCustomButton.parent = null
+                }
+            }
         }
+    }
+
+    function updateConfCustom () {
+        confCustomTimer.start()
     }
 
     function indexOffset() {
@@ -1077,7 +1095,11 @@ ApplicationWindow {
                     confAppButton.parent = null
                 }
 
-                if (!limited && VescIf.getFwSupportsConfiguration()) {
+                if (VescIf.getFwSupportsConfiguration()) {
+                    confTimer.restart()
+                    confTimer.mcConfRx = false
+                    confTimer.appConfRx = false
+
                     mCommands.getMcconf()
                     mCommands.getAppConf()
                 }

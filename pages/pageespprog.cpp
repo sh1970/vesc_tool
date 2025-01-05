@@ -69,11 +69,16 @@ PageEspProg::PageEspProg(QWidget *parent) :
 
 PageEspProg::~PageEspProg()
 {
+    saveStateToSettings();
+    delete ui;
+}
+
+void PageEspProg::saveStateToSettings()
+{
     QSettings set;
     set.setValue("pageespprog/lastcustomblfile", ui->blEdit->text());
     set.setValue("pageespprog/lastcustompartfile", ui->partEdit->text());
     set.setValue("pageespprog/lastcustomappfile", ui->appEdit->text());
-    delete ui;
 }
 
 VescInterface *PageEspProg::vesc() const
@@ -106,8 +111,18 @@ void PageEspProg::timerSlot()
     ui->serialDisconnectButton->setEnabled(mEspFlash.isEspConnected());
     ui->flashBlButton->setEnabled(!mEspFlash.isEspConnected() && vescConn && !mVescUploadOngoing);
 
-    if (!mEspFlash.isEspConnected() && ui->flashButton->isEnabled()) {
-        ui->flashButton->setEnabled(false);
+    if (!mEspFlash.isEspConnected()) {
+        if (ui->flashButton->isEnabled()) {
+            ui->flashButton->setEnabled(false);
+        }
+
+        if (ui->eraseLispButton->isEnabled()) {
+            ui->eraseLispButton->setEnabled(false);
+        }
+
+        if (ui->eraseQmlButton->isEnabled()) {
+            ui->eraseQmlButton->setEnabled(false);
+        }
     }
 }
 
@@ -149,6 +164,8 @@ void PageEspProg::on_serialConnectButton_clicked()
                 }
             }
             ui->flashButton->setEnabled(true);
+            ui->eraseLispButton->setEnabled(true);
+            ui->eraseQmlButton->setEnabled(true);
         } break;
 
         default:
@@ -346,3 +363,22 @@ void PageEspProg::listAllFw()
     }
 }
 
+void PageEspProg::on_eraseLispButton_clicked()
+{
+    ui->eraseLispButton->setEnabled(false);
+    ui->progWidget->setText("Erasing Lisp...");
+    ui->progWidget->setValue(0.0);
+    mEspFlash.eraseFlash(512 * 1024, ui->lispOffsetBox->value());
+    ui->eraseLispButton->setEnabled(true);
+    ui->progWidget->setText("Done erasing Lisp!");
+}
+
+void PageEspProg::on_eraseQmlButton_clicked()
+{
+    ui->eraseLispButton->setEnabled(false);
+    ui->progWidget->setText("Erasing Qml...");
+    ui->progWidget->setValue(0.0);
+    mEspFlash.eraseFlash(128 * 1024, ui->qmlOffsetBox->value());
+    ui->eraseLispButton->setEnabled(true);
+    ui->progWidget->setText("Done erasing Qml!");
+}

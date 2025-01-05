@@ -37,6 +37,7 @@ public:
     explicit PageEspProg(QWidget *parent = nullptr);
     ~PageEspProg();
 
+    void saveStateToSettings();
     VescInterface *vesc() const;
     void setVesc(VescInterface *vesc);
 
@@ -51,6 +52,8 @@ private slots:
     void on_appChooseButton_clicked();
     void on_flashBlButton_clicked();
     void on_cancelButton_clicked();
+    void on_eraseLispButton_clicked();
+    void on_eraseQmlButton_clicked();
 
 private:
     QTimer *mTimer;
