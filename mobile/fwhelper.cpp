@@ -61,6 +61,16 @@ QVariantMap FwHelper::getHardwares(FW_RX_PARAMS params, QString hw)
         hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/DevKitM-1");
     } else if (params.hw == "STR-DCDC") {
         hws.insert(params.hw, "://res/firmwares_custom_module/str-dcdc");
+    } else if (params.hw == "VBMS32") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VBMS32");
+    } else if (params.hw == "STR365 IO") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/STR365");
+    } else if (params.hw == "VDisp") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VDisp");
+    } else if (params.hw == "VDisp Dual") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/VDisp Dual");
+    } else if (params.hw == "BMS RB") {
+        hws.insert(params.hw, "://res/firmwares_esp/ESP32-C3/BMS RB");
     }
 
     return hws;
@@ -151,8 +161,8 @@ QVariantMap FwHelper::getBootloaders(FW_RX_PARAMS params, QString hw)
     return bls;
 }
 
-bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
-                              bool isBootloader, bool checkName, bool fwdCan)
+bool FwHelper::uploadFirmwareV2(QString filename, VescInterface *vesc, bool isBootloader,
+                                bool checkName, bool fwdCan, bool autoDisconnect)
 {
     if (filename.startsWith("file:/")) {
         filename.remove(0, 6);
@@ -164,11 +174,11 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
 
     if (checkName) {
         if (!fileInfo.fileName().toLower().endsWith(".bin") &&
-                !fileInfo.fileName().toLower().endsWith(".hex")) {
+            !fileInfo.fileName().toLower().endsWith(".hex")) {
             vesc->emitMessageDialog(
-                        tr("Upload Error"),
-                        tr("The selected file name seems to be invalid."),
-                        false, false);
+                tr("Upload Error"),
+                tr("The selected file name seems to be invalid."),
+                false, false);
             return false;
         }
     }
@@ -215,14 +225,20 @@ bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
                 data.append(i.value());
             }
 
-            fwRes = vesc->fwUpload(data, isBootloader, fwdCan);
+            fwRes = vesc->fwUpload(data, isBootloader, fwdCan, true, autoDisconnect);
         }
     } else {
         QByteArray data = file.readAll();
-        fwRes = vesc->fwUpload(data, isBootloader, fwdCan);
+        fwRes = vesc->fwUpload(data, isBootloader, fwdCan, true, autoDisconnect);
     }
 
     return fwRes;
+}
+
+bool FwHelper::uploadFirmware(QString filename, VescInterface *vesc,
+                              bool isBootloader, bool checkName, bool fwdCan)
+{
+    return uploadFirmwareV2(filename, vesc, isBootloader, checkName, fwdCan, true);
 }
 
 bool FwHelper::uploadFirmwareSingleShotTimer(QString filename, VescInterface *vesc,

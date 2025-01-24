@@ -73,12 +73,17 @@ PageFirmware::PageFirmware(QWidget *parent) :
 
 PageFirmware::~PageFirmware()
 {
+    saveStateToSettings();
+    delete ui;
+}
+
+void PageFirmware::saveStateToSettings()
+{
     QSettings set;
     set.setValue("pagefirmware/lastcustomfile", ui->fwEdit->text());
     set.setValue("pagefirmware/lastcustomfile2", ui->fw2Edit->text());
     set.setValue("pagefirmware/lastcustomfile3", ui->fw3Edit->text());
     set.setValue("pagefirmware/lastcustomfile4", ui->fw4Edit->text());
-    delete ui;
 }
 
 VescInterface *PageFirmware::vesc() const
@@ -221,11 +226,8 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         fwDir = "://res/firmwares_bms";
     }
 
-    QDirIterator it(fwDir);
-    while (it.hasNext()) {
-        QFileInfo fi(it.next());
+    foreach (const auto &fi, QDir(fwDir).entryInfoList(QDir::NoFilter, QDir::Name)) {
         QStringList names = fi.fileName().split("_o_");
-
         if (fi.isDir() && (params.hw.isEmpty() || names.contains(params.hw, Qt::CaseInsensitive))) {
             QListWidgetItem *item = new QListWidgetItem;
 
@@ -248,6 +250,16 @@ void PageFirmware::updateHwList(FW_RX_PARAMS params)
         extraPath = "://res/firmwares_esp/ESP32-C3/DevKitM-1";
     } else if (params.hw == "STR-DCDC") {
         extraPath = "://res/firmwares_custom_module/str-dcdc";
+    } else if (params.hw == "VBMS32") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/VBMS32";
+    } else if (params.hw == "STR365 IO") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/STR365";
+    } else if (params.hw == "VDisp") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/VDisp";
+    } else if (params.hw == "VDisp Dual") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/VDisp Dual";
+    } else if (params.hw == "BMS RB") {
+        extraPath = "://res/firmwares_esp/ESP32-C3/BMS RB";
     }
 
     if (!extraPath.isEmpty()) {
@@ -546,6 +558,14 @@ void PageFirmware::uploadFw(bool allOverCan)
                                       tr("Upload Error"),
                                       tr("The selected file name seems to be invalid."));
                 return;
+            }
+
+            if (ui->fwCustomBlBox->isChecked() && mVesc->commands()->getLimitedSupportsEraseBootloader()) {
+                QListWidgetItem *item = ui->blList->currentItem();
+
+                if (item) {
+                    fileBl.setFileName(item->data(Qt::UserRole).toString());
+                }
             }
         } else {
             QListWidgetItem *item = ui->blList->currentItem();

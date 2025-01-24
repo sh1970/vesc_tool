@@ -62,13 +62,14 @@
     <service
             android:name='"com.vedder.vesc.VForegroundService"'
             android:enabled='"true"'
-            android:exported='"true"' />
+            android:exported='"true"'
+            android:foregroundServiceType='"location"' />
 
     <!-- For adding service(s) please check: https://wiki.qt.io/AndroidServices -->
 
     </application>
 
-    <uses-sdk android:minSdkVersion='"23"' android:targetSdkVersion='"31"'/>
+    <uses-sdk android:minSdkVersion='"23"' android:targetSdkVersion='"34"'/>
     <supports-screens android:largeScreens='"true"' android:normalScreens='"true"' android:anyDensity='"true"' android:smallScreens='"true"'/>
 
     <!-- The following comment will be replaced upon deployment with default permissions based on the dependencies of the application.
@@ -89,6 +90,7 @@
     <uses-permission android:name='"android.permission.ACCESS_FINE_LOCATION"' />
     <uses-permission android:name='"android.permission.ACCESS_BACKGROUND_LOCATION"' />
     <uses-permission android:name='"android.permission.FOREGROUND_SERVICE"' />
+    <uses-permission android:name='"android.permission.FOREGROUND_SERVICE_LOCATION"' />
     <uses-permission android:name='"android.permission.BLUETOOTH_SCAN"'/>
     <uses-permission android:name='"android.permission.BLUETOOTH_CONNECT"'/>
 </manifest>

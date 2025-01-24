@@ -42,23 +42,22 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;BLDC&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Trapezoidal commutation mode for PMSM motors.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;DC&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;DC motor. A DC motor is connected to phase 1 and phase 3.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;FOC&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Field Oriented Control (FOC) for PMSM (or BLDC) motors. The motor is commutated with sine waves instead of a trapezoidal waveform as is the case for BLDC commutation. FOC runs the motors more quietly (especially at low speed and high load), is slightly more efficient and provides automatic optimal timing.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto'; font-weight:600;&quot;&gt;GPD&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;General Purpose Drive between phase 1 and 3. Should be used with a custom application on the VESC, or on the computer with the VESC Tool backend providing samples.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;BLDC&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Trapezoidal commutation mode for PMSM motors.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;DC&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;DC motor. A DC motor is connected to phase 1 and phase 3.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Field Oriented Control (FOC) for PMSM (or BLDC) motors. The motor is commutated with sine waves instead of a trapezoidal waveform as is the case for BLDC commutation. FOC runs the motors more quietly (especially at low speed and high load), is slightly more efficient and provides automatic optimal timing.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;GPD&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;General Purpose Drive between phase 1 and 3. Should be used with a custom application on the VESC, or on the computer with the VESC Tool backend providing samples.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_DEFAULT_MOTOR_TYPE</cDefine>
             <valInt>2</valInt>
             <enumNames>BLDC</enumNames>
             <enumNames>DC</enumNames>
             <enumNames>FOC</enumNames>
-            <enumNames>GPD</enumNames>
         </motor_type>
         <sensor_mode>
             <longName>Sensor Mode</longName>
@@ -204,7 +203,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>1</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>1</valDouble>
+            <valDouble>0.005</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>7</vTx>
@@ -501,91 +500,83 @@ p, li { white-space: pre-wrap; }
         </l_slow_abs_current>
         <l_temp_fet_start>
             <longName>MOSFET Temp Cutoff Start</longName>
-            <type>1</type>
+            <type>2</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The MOSFET temperature at which motor current starts to get reduced.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The MOSFET temperature at which motor current starts to get reduced.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_LIM_TEMP_FET_START</cDefine>
-            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>190</maxDouble>
-            <minDouble>0</minDouble>
+            <maxInt>190</maxInt>
+            <minInt>0</minInt>
             <showDisplay>1</showDisplay>
-            <stepDouble>1</stepDouble>
-            <valDouble>85</valDouble>
-            <vTxDoubleScale>10</vTxDoubleScale>
+            <stepInt>1</stepInt>
+            <valInt>85</valInt>
             <suffix> °C</suffix>
-            <vTx>7</vTx>
+            <vTx>1</vTx>
         </l_temp_fet_start>
         <l_temp_fet_end>
             <longName>MOSFET Temp Cutoff End</longName>
-            <type>1</type>
+            <type>2</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The MOSFET temperature above which motor current is not allowed and a fault is thrown.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The MOSFET temperature above which motor current is not allowed and a fault is thrown.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_LIM_TEMP_FET_END</cDefine>
-            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>190</maxDouble>
-            <minDouble>0</minDouble>
+            <maxInt>190</maxInt>
+            <minInt>0</minInt>
             <showDisplay>1</showDisplay>
-            <stepDouble>1</stepDouble>
-            <valDouble>100</valDouble>
-            <vTxDoubleScale>10</vTxDoubleScale>
+            <stepInt>1</stepInt>
+            <valInt>100</valInt>
             <suffix> °C</suffix>
-            <vTx>7</vTx>
+            <vTx>1</vTx>
         </l_temp_fet_end>
         <l_temp_motor_start>
             <longName>Motor Temp Cutoff Start</longName>
-            <type>1</type>
+            <type>2</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The motor temperature at which motor current starts to get reduced.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The motor temperature at which motor current starts to get reduced.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_LIM_TEMP_MOTOR_START</cDefine>
-            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>190</maxDouble>
-            <minDouble>0</minDouble>
+            <maxInt>190</maxInt>
+            <minInt>0</minInt>
             <showDisplay>1</showDisplay>
-            <stepDouble>1</stepDouble>
-            <valDouble>85</valDouble>
-            <vTxDoubleScale>10</vTxDoubleScale>
+            <stepInt>1</stepInt>
+            <valInt>85</valInt>
             <suffix> °C</suffix>
-            <vTx>7</vTx>
+            <vTx>1</vTx>
         </l_temp_motor_start>
         <l_temp_motor_end>
             <longName>Motor Temp Cutoff End</longName>
-            <type>1</type>
+            <type>2</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The motor temperature above which motor current is not allowed and a fault is thrown.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The motor temperature above which motor current is not allowed and a fault is thrown.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_L_LIM_TEMP_MOTOR_END</cDefine>
-            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>190</maxDouble>
-            <minDouble>0</minDouble>
+            <maxInt>190</maxInt>
+            <minInt>0</minInt>
             <showDisplay>1</showDisplay>
-            <stepDouble>1</stepDouble>
-            <valDouble>100</valDouble>
-            <vTxDoubleScale>10</vTxDoubleScale>
+            <stepInt>1</stepInt>
+            <valInt>100</valInt>
             <suffix> °C</suffix>
-            <vTx>7</vTx>
+            <vTx>1</vTx>
         </l_temp_motor_end>
         <l_temp_accel_dec>
             <longName>Acceleration Temperature Decrease</longName>
@@ -1120,7 +1111,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.03</valDouble>
+            <valDouble>0.0123</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1142,7 +1133,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>50</valDouble>
+            <valDouble>11.85</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1177,7 +1168,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>25000</valDouble>
+            <valDouble>30000</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> kHz</suffix>
             <vTx>9</vTx>
@@ -1374,13 +1365,13 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>7e-06</valDouble>
+            <valDouble>1.227e-05</valDouble>
             <vTxDoubleScale>1e+08</vTxDoubleScale>
             <suffix> µH</suffix>
             <vTx>9</vTx>
         </foc_motor_l>
         <foc_motor_ld_lq_diff>
-            <longName>Motor Inductance Difference (Ld - Lq)</longName>
+            <longName>Motor Inductance Difference (Lq - Ld)</longName>
             <type>1</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -1396,7 +1387,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-10</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>3.77e-06</valDouble>
             <vTxDoubleScale>1e+08</vTxDoubleScale>
             <suffix> µH</suffix>
             <vTx>9</vTx>
@@ -1418,7 +1409,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.1</stepDouble>
-            <valDouble>0.015</valDouble>
+            <valDouble>0.0118</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix> mΩ</suffix>
             <vTx>9</vTx>
@@ -1440,7 +1431,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.00245</valDouble>
+            <valDouble>0.004014</valDouble>
             <vTxDoubleScale>100000</vTxDoubleScale>
             <suffix> mWb</suffix>
             <vTx>9</vTx>
@@ -1462,7 +1453,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>9e+07</valDouble>
+            <valDouble>6.206e+07</valDouble>
             <vTxDoubleScale>0.01</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1535,7 +1526,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>10</valDouble>
+            <valDouble>50</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1557,7 +1548,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>200</valDouble>
+            <valDouble>1000</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1603,7 +1594,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
-            <valDouble>400</valDouble>
+            <valDouble>2500</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1625,7 +1616,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
-            <valDouble>400</valDouble>
+            <valDouble>1500</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -1653,7 +1644,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>1</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.1</valDouble>
+            <valDouble>0</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>7</vTx>
@@ -1763,7 +1754,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.05</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>0.1</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> S</suffix>
             <vTx>7</vTx>
@@ -1785,7 +1776,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.05</stepDouble>
-            <valDouble>0.1</valDouble>
+            <valDouble>0.05</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> S</suffix>
             <vTx>7</vTx>
@@ -2042,7 +2033,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
-            <valDouble>1000</valDouble>
+            <valDouble>2500</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -2256,7 +2247,7 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_CC_DECOUPLING_CROSS_BEMF&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Both options above are enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_CC_DECOUPLING</cDefine>
-            <valInt>2</valInt>
+            <valInt>0</valInt>
             <enumNames>FOC_CC_DECOUPLING_DISABLED</enumNames>
             <enumNames>FOC_CC_DECOUPLING_CROSS</enumNames>
             <enumNames>FOC_CC_DECOUPLING_BEMF</enumNames>
@@ -2279,15 +2270,25 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_MXLEMMING&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Observer by David Molony, also known as mxlemming. This observer does not rely on the observer gain parameter, which is a significant advantage.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_MXV&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Same as MXLEMMING, but truncates the flux linkage in two dimensions.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_ORTEGA_LAMBDA_COMP&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_MXLEMMING_LAMBDA_COMP&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Same as the others, but with flux linkage tracking. The flux linkage tracker uses the observer gain for both observers, but it is less critical to get it right here as the flux linkage is mostly DC (unless the current is high and the motor starts to saturate).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_MXV_LAMBDA_COMP&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Same as the others, but with flux linkage tracking. The flux linkage tracker uses the observer gain for both observers, but it is less critical to get it right here as the flux linkage is mostly DC (unless the current is high and the motor starts to saturate).&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;FOC_OBSERVER_MXV_LAMBDA_COMP_LIN&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Uses linear lambda compensation instead of squares.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_OBSERVER_TYPE</cDefine>
-            <valInt>0</valInt>
+            <valInt>3</valInt>
             <enumNames>FOC_OBSERVER_ORTEGA_ORIGINAL</enumNames>
             <enumNames>FOC_OBSERVER_MXLEMMING</enumNames>
             <enumNames>FOC_OBSERVER_ORTEGA_LAMBDA_COMP</enumNames>
             <enumNames>FOC_OBSERVER_MXLEMMING_LAMBDA_COMP</enumNames>
+            <enumNames>FOC_OBSERVER_MXV</enumNames>
+            <enumNames>FOC_OBSERVER_MXV_LAMBDA_COMP</enumNames>
+            <enumNames>FOC_OBSERVER_MXV_LAMBDA_COMP_LIN</enumNames>
         </foc_observer_type>
         <foc_hfi_voltage_start>
             <longName>HFI Start Voltage</longName>
@@ -2352,7 +2353,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>5</valDouble>
+            <valDouble>6</valDouble>
             <vTxDoubleScale>10</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2374,7 +2375,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.01</stepDouble>
-            <valDouble>0.4</valDouble>
+            <valDouble>0.3</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>7</vTx>
@@ -2418,7 +2419,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.5</stepDouble>
-            <valDouble>2</valDouble>
+            <valDouble>0</valDouble>
             <vTxDoubleScale>100</vTxDoubleScale>
             <suffix> A</suffix>
             <vTx>7</vTx>
@@ -2440,7 +2441,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>100</stepDouble>
-            <valDouble>2000</valDouble>
+            <valDouble>3000</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -2461,7 +2462,7 @@ p, li { white-space: pre-wrap; }
             <minInt>2</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>65</valInt>
+            <valInt>5</valInt>
             <suffix></suffix>
             <vTx>3</vTx>
         </foc_hfi_start_samples>
@@ -2533,7 +2534,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>2048</valDouble>
+            <valDouble>2047.39</valDouble>
             <vTxDoubleScale>1</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -2555,7 +2556,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>2048</valDouble>
+            <valDouble>2048.29</valDouble>
             <vTxDoubleScale>1</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -2577,7 +2578,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>1</stepDouble>
-            <valDouble>2048</valDouble>
+            <valDouble>2048.89</valDouble>
             <vTxDoubleScale>1</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -2599,7 +2600,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>0.0002</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2621,7 +2622,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>0.0006</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2643,7 +2644,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>-0.0009</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2665,7 +2666,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>0.0005</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2687,7 +2688,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>-0.0003</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2709,7 +2710,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>-2</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0005</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>-0.0002</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> V</suffix>
             <vTx>7</vTx>
@@ -2736,7 +2737,7 @@ p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Disable the phase filter fault code. This can be useful if the phase filter fault seems to trigger for no reason on some difficult motors.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_PHASE_FILTER_DISABLE_FAULT</cDefine>
-            <valInt>0</valInt>
+            <valInt>1</valInt>
         </foc_phase_filter_disable_fault>
         <foc_phase_filter_max_erpm>
             <longName>Maximum ERPM for phase filters</longName>
@@ -2755,7 +2756,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>10</stepDouble>
-            <valDouble>10000</valDouble>
+            <valDouble>4000</valDouble>
             <vTxDoubleScale>10000</vTxDoubleScale>
             <suffix> ERPM</suffix>
             <vTx>9</vTx>
@@ -2871,7 +2872,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>10</stepDouble>
-            <valDouble>0</valDouble>
+            <valDouble>0.2</valDouble>
             <vTxDoubleScale>1000</vTxDoubleScale>
             <suffix> ms</suffix>
             <vTx>7</vTx>
@@ -2893,116 +2894,22 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Use the observer position. This is usually less noisy than hall sensors or hfi, but it can drift slowly at 0 speed.&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_FOC_SPEED_SOURCE</cDefine>
-            <valInt>1</valInt>
+            <valInt>0</valInt>
             <enumNames>Corrected Position</enumNames>
             <enumNames>Observer</enumNames>
         </foc_speed_soure>
-        <gpd_buffer_notify_left>
-            <longName>Buffer Notification Length</longName>
-            <type>2</type>
+        <foc_short_ls_on_zero_duty>
+            <longName>Short Low-Side FETs on Zero Duty</longName>
+            <type>5</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Send notification when the sample fifo buffer has less than this amount of samples left.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_GPD_BUFFER_NOTIFY_LEFT</cDefine>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxInt>2048</maxInt>
-            <minInt>0</minInt>
-            <showDisplay>0</showDisplay>
-            <stepInt>10</stepInt>
-            <valInt>200</valInt>
-            <suffix></suffix>
-            <vTx>4</vTx>
-        </gpd_buffer_notify_left>
-        <gpd_buffer_interpol>
-            <longName>Buffer Sampling Interpolation</longName>
-            <type>2</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Interpolate buffer samples, meaning that they are used for several pwm cycles. This number defines for how many samples a sample is reused. 0 means that a new sample is picked every cycle, 1 means that one sample is used twice etc.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_GPD_BUFFER_INTERPOL</cDefine>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxInt>2048</maxInt>
-            <minInt>0</minInt>
-            <showDisplay>0</showDisplay>
-            <stepInt>1</stepInt>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Short low-side FETs on 0 duty cycle. This will give a bit more braking torque when the motor is standing still and braking is requested. It also uses less power to drive the FETs. The downsides are that the low-side FETs will take all load by themselves and that the transition to and from full brake will be a bit more rough.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_FOC_SHORT_LS_ON_ZERO_DUTY</cDefine>
             <valInt>0</valInt>
-            <suffix></suffix>
-            <vTx>4</vTx>
-        </gpd_buffer_interpol>
-        <gpd_current_filter_const>
-            <longName>Current Filter Constant</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Constant for the filtered current in the GPD implementation. Will affect how fast the slow abs max current fault triggers. Range 0 to 1, where 0 is the slowest and 1 is no filtering.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_GPD_CURRENT_FILTER_CONST</cDefine>
-            <editorDecimalsDouble>3</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>1</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>0.1</valDouble>
-            <vTxDoubleScale>10000</vTxDoubleScale>
-            <suffix></suffix>
-            <vTx>7</vTx>
-        </gpd_current_filter_const>
-        <gpd_current_kp>
-            <longName>Current KP</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Current controller proportional gain.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_GPD_CURRENT_KP</cDefine>
-            <editorDecimalsDouble>4</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>100000</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>0.03</valDouble>
-            <vTxDoubleScale>100000</vTxDoubleScale>
-            <suffix></suffix>
-            <vTx>9</vTx>
-        </gpd_current_kp>
-        <gpd_current_ki>
-            <longName>Current KI</longName>
-            <type>1</type>
-            <transmittable>1</transmittable>
-            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Current controller integral gain.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
-            <cDefine>MCCONF_GPD_CURRENT_KI</cDefine>
-            <editorDecimalsDouble>2</editorDecimalsDouble>
-            <editorScale>1</editorScale>
-            <editAsPercentage>0</editAsPercentage>
-            <maxDouble>100000</maxDouble>
-            <minDouble>0</minDouble>
-            <showDisplay>0</showDisplay>
-            <stepDouble>0.01</stepDouble>
-            <valDouble>50</valDouble>
-            <vTxDoubleScale>100000</vTxDoubleScale>
-            <suffix></suffix>
-            <vTx>9</vTx>
-        </gpd_current_ki>
+        </foc_short_ls_on_zero_duty>
         <sp_pid_loop_rate>
             <longName>PID Loop Rate</longName>
             <type>4</type>
@@ -3098,7 +3005,7 @@ p, li { white-space: pre-wrap; }
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;Filter on derivative term for speed controller. The range is 0 to 1, where 0 is the maximum amount of filtering (infinite) and 1 is no filtering.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Filter on derivative term for speed controller. The range is 0 to 1, where 0 is the maximum amount of filtering (infinite) and 1 is no filtering.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_S_PID_KD_FILTER</cDefine>
             <editorDecimalsDouble>3</editorDecimalsDouble>
             <editorScale>1</editorScale>
@@ -3209,7 +3116,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.001</stepDouble>
-            <valDouble>0.03</valDouble>
+            <valDouble>0.025</valDouble>
             <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -3253,7 +3160,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0001</stepDouble>
-            <valDouble>0.0004</valDouble>
+            <valDouble>0</valDouble>
             <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -3297,7 +3204,7 @@ p, li { white-space: pre-wrap; }
             <minDouble>0</minDouble>
             <showDisplay>0</showDisplay>
             <stepDouble>0.0001</stepDouble>
-            <valDouble>0.0004</valDouble>
+            <valDouble>0.00035</valDouble>
             <vTxDoubleScale>1e+06</vTxDoubleScale>
             <suffix></suffix>
             <vTx>9</vTx>
@@ -3790,7 +3697,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>16</valInt>
+            <valInt>19</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </m_drv8301_oc_adj>
@@ -4010,7 +3917,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>0</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>1</valInt>
+            <valInt>3</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </m_hall_extra_samples>
@@ -4030,7 +3937,7 @@ p, li { white-space: pre-wrap; }
             <minInt>0</minInt>
             <showDisplay>1</showDisplay>
             <stepInt>1</stepInt>
-            <valInt>1</valInt>
+            <valInt>45</valInt>
             <suffix></suffix>
             <vTx>1</vTx>
         </m_batt_filter_const>
@@ -4380,13 +4287,18 @@ p, li { white-space: pre-wrap; }
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;SOC&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Decrease the input current as the state of charge (SOC) gets too low.&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;VCell Min&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Decrease the input current as the lowest cell voltage gets too low.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;VCell Max&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Decrease the input regen current as the highest cell voltage gets too high.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_BMS_LIMIT_MODE</cDefine>
             <valInt>3</valInt>
             <enumNames>Overtemp</enumNames>
             <enumNames>SOC</enumNames>
-            <enumNames>Unused</enumNames>
-            <enumNames>Unused</enumNames>
+            <enumNames>VCell Min</enumNames>
+            <enumNames>VCell Max</enumNames>
             <enumNames>Unused</enumNames>
             <enumNames>Unused</enumNames>
             <enumNames>Unused</enumNames>
@@ -4394,51 +4306,47 @@ p, li { white-space: pre-wrap; }
         </bms.limit_mode>
         <bms.t_limit_start>
             <longName>Temperature Limit Start</longName>
-            <type>1</type>
+            <type>2</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The battery temperature above which battery current starts to get reduced.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;If there is more than one BMS on the CAN-bus, the one with the highest value will be used.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The battery temperature above which battery current starts to get reduced.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If there is more than one BMS on the CAN-bus, the one with the highest value will be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_BMS_T_LIMIT_START</cDefine>
-            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>99</maxDouble>
-            <minDouble>0</minDouble>
+            <maxInt>99</maxInt>
+            <minInt>0</minInt>
             <showDisplay>1</showDisplay>
-            <stepDouble>1</stepDouble>
-            <valDouble>45</valDouble>
-            <vTxDoubleScale>100</vTxDoubleScale>
+            <stepInt>1</stepInt>
+            <valInt>45</valInt>
             <suffix> °C</suffix>
-            <vTx>7</vTx>
+            <vTx>1</vTx>
         </bms.t_limit_start>
         <bms.t_limit_end>
             <longName>Temperature Limit End</longName>
-            <type>1</type>
+            <type>2</type>
             <transmittable>1</transmittable>
             <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;The battery temperature above which battery current is not allowed and a fault is thrown.&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Roboto';&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'Roboto';&quot;&gt;If there is more than one BMS on the CAN-bus, the one with the highest value will be ued.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The battery temperature above which battery current is not allowed and a fault is thrown.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If there is more than one BMS on the CAN-bus, the one with the highest value will be ued.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
             <cDefine>MCCONF_BMS_T_LIMIT_END</cDefine>
-            <editorDecimalsDouble>1</editorDecimalsDouble>
             <editorScale>1</editorScale>
             <editAsPercentage>0</editAsPercentage>
-            <maxDouble>99</maxDouble>
-            <minDouble>0</minDouble>
+            <maxInt>99</maxInt>
+            <minInt>0</minInt>
             <showDisplay>1</showDisplay>
-            <stepDouble>1</stepDouble>
-            <valDouble>65</valDouble>
-            <vTxDoubleScale>100</vTxDoubleScale>
+            <stepInt>1</stepInt>
+            <valInt>65</valInt>
             <suffix> °C</suffix>
-            <vTx>7</vTx>
+            <vTx>1</vTx>
         </bms.t_limit_end>
         <bms.soc_limit_start>
             <longName>SOC Limit Start</longName>
@@ -4488,6 +4396,102 @@ p, li { white-space: pre-wrap; }
             <suffix></suffix>
             <vTx>7</vTx>
         </bms.soc_limit_end>
+        <bms.vmin_limit_start>
+            <longName>VCell Min Limit Start</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The minimum cell voltage below which battery current starts to get reduced.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If there is more than one BMS on the CAN-bus, the one with the lowest value will be ued.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_BMS_VMIN_LIMIT_START</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>6</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>2.9</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </bms.vmin_limit_start>
+        <bms.vmin_limit_end>
+            <longName>VCell Min Limit End</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The minimum cell voltage below which battery current is not allowed anymore.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If there is more than one BMS on the CAN-bus, the one with the lowest value will be ued.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_BMS_VMIN_LIMIT_END</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>6</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>2.5</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </bms.vmin_limit_end>
+        <bms.vmax_limit_start>
+            <longName>VCell Max Limit Start</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The maximum cell voltage above which regen current starts to get reduced.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If there is more than one BMS on the CAN-bus, the one with the highest value will be ued.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_BMS_VMAX_LIMIT_START</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>6</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>4.2</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </bms.vmax_limit_start>
+        <bms.vmax_limit_end>
+            <longName>VCell Max Limit End</longName>
+            <type>1</type>
+            <transmittable>1</transmittable>
+            <description>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Roboto'; ; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;The maximum cell voltage above which regen current is not allowed anymore.&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;If there is more than one BMS on the CAN-bus, the one with the highest value will be ued.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</description>
+            <cDefine>MCCONF_BMS_VMAX_LIMIT_END</cDefine>
+            <editorDecimalsDouble>2</editorDecimalsDouble>
+            <editorScale>1</editorScale>
+            <editAsPercentage>0</editAsPercentage>
+            <maxDouble>6</maxDouble>
+            <minDouble>0</minDouble>
+            <showDisplay>0</showDisplay>
+            <stepDouble>0.1</stepDouble>
+            <valDouble>4.3</valDouble>
+            <vTxDoubleScale>1000</vTxDoubleScale>
+            <suffix> V</suffix>
+            <vTx>7</vTx>
+        </bms.vmax_limit_end>
         <bms.fwd_can_mode>
             <longName>Forward CAN to Local</longName>
             <type>4</type>
@@ -4649,11 +4653,7 @@ p, li { white-space: pre-wrap; }
         <ser>foc_fw_ramp_time</ser>
         <ser>foc_fw_q_current_factor</ser>
         <ser>foc_speed_soure</ser>
-        <ser>gpd_buffer_notify_left</ser>
-        <ser>gpd_buffer_interpol</ser>
-        <ser>gpd_current_filter_const</ser>
-        <ser>gpd_current_kp</ser>
-        <ser>gpd_current_ki</ser>
+        <ser>foc_short_ls_on_zero_duty</ser>
         <ser>sp_pid_loop_rate</ser>
         <ser>s_pid_kp</ser>
         <ser>s_pid_ki</ser>
@@ -4713,6 +4713,10 @@ p, li { white-space: pre-wrap; }
         <ser>bms.t_limit_end</ser>
         <ser>bms.soc_limit_start</ser>
         <ser>bms.soc_limit_end</ser>
+        <ser>bms.vmin_limit_start</ser>
+        <ser>bms.vmin_limit_end</ser>
+        <ser>bms.vmax_limit_start</ser>
+        <ser>bms.vmax_limit_end</ser>
         <ser>bms.fwd_can_mode</ser>
     </SerOrder>
     <Grouping>
@@ -4813,6 +4817,10 @@ p, li { white-space: pre-wrap; }
                     <param>bms.t_limit_end</param>
                     <param>bms.soc_limit_start</param>
                     <param>bms.soc_limit_end</param>
+                    <param>bms.vmin_limit_start</param>
+                    <param>bms.vmin_limit_end</param>
+                    <param>bms.vmax_limit_start</param>
+                    <param>bms.vmax_limit_end</param>
                     <param>bms.fwd_can_mode</param>
                 </subgroupParams>
             </subgroup>
@@ -5031,20 +5039,7 @@ p, li { white-space: pre-wrap; }
                     <param>foc_mtpa_mode</param>
                     <param>foc_observer_offset</param>
                     <param>foc_speed_soure</param>
-                </subgroupParams>
-            </subgroup>
-        </group>
-        <group>
-            <groupName>GPD</groupName>
-            <subgroup>
-                <subgroupName>General</subgroupName>
-                <subgroupParams>
-                    <param>pwm_mode</param>
-                    <param>gpd_buffer_notify_left</param>
-                    <param>gpd_buffer_interpol</param>
-                    <param>gpd_current_filter_const</param>
-                    <param>gpd_current_kp</param>
-                    <param>gpd_current_ki</param>
+                    <param>foc_short_ls_on_zero_duty</param>
                 </subgroupParams>
             </subgroup>
         </group>

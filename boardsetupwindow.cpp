@@ -468,14 +468,7 @@ bool BoardSetupWindow::tryFirmwareUpload(){
             testResult = false;
             return false;
         }
-        if (file.size() > 400000) {
-            QMessageBox::critical(this,
-                                  tr("Upload Error"),
-                                  tr("The selected file is too large to be a firmware."));
-            testResultMsg = "The included firmware file is too large.";
-            testResult = false;
-            return false;
-        }
+
         QByteArray data = file.readAll();
 
         fwRes = mVesc->fwUpload(data, is_Bootloader, num_VESCs > 1);
@@ -490,9 +483,14 @@ bool BoardSetupWindow::tryFirmwareUpload(){
         testResultMsg = "The firmware file path is non-existent.";
         return false;
     }
-    for(int j = 15; j>-1; j--){
+    for(int j = 25; j >= 0; j--){
         ui->firmwareLabel->setText("Waiting for Reboot: " + QString::number(j)  + " s");
         Utility::sleepWithEventLoop(1000);
+
+        if (j < 20 && mVesc->lastPortAvailable()) {
+            Utility::sleepWithEventLoop(1000);
+            break;
+        }
     }
     bool reconnected = trySerialConnect();
     if(reconnected){

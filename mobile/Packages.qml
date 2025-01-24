@@ -66,12 +66,13 @@ Item {
         var pkgs = mLoader.reloadPackageArchive()
 
         for (var i = 0;i < pkgs.length;i++) {
-            if (!pkgs[i].isLibrary) {
+            if (!pkgs[i].isLibrary && mLoader.shouldShowPackage(pkgs[i])) {
                 pkgModel.append({"pkgName": pkgs[i].name,
                                     "pkgDescription": pkgs[i].description,
                                     "pkg": pkgs[i]})
             }
         }
+
         enableDialog()
     }
 
@@ -180,7 +181,12 @@ Item {
                                 text: "Info"
 
                                 onClicked: {
-                                    VescIf.emitMessageDialog(pkgName, Utility.md2html(pkgDescription), true, true)
+                                    var line1 = pkgDescription.slice(0, pkgDescription.indexOf("\n"))
+                                    if (line1.toUpperCase().includes("<!DOCTYPE HTML PUBLIC")) {
+                                        VescIf.emitMessageDialog(pkgName, pkgDescription, true, true)
+                                    } else {
+                                        VescIf.emitMessageDialog(pkgName, Utility.md2html(pkgDescription), true, true)
+                                    }
                                 }
                             }
                         }
@@ -353,6 +359,20 @@ Item {
         ProgressBar {
             anchors.fill: parent
             indeterminate: visible
+        }
+    }
+
+    Connections {
+        target: VescIf
+
+        function onPortConnectedChanged() {
+            if (!VescIf.isPortConnected()) {
+                reloadArchive()
+            }
+        }
+
+        function onCustomConfigLoadDone() {
+            reloadArchive()
         }
     }
 }

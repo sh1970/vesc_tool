@@ -35,10 +35,12 @@ public:
     Q_INVOKABLE void setVesc(VescInterface *vesc);
 
     Q_INVOKABLE bool lispErase(int size);
-    QByteArray lispPackImports(QString codeStr, QString editorPath = QDir::currentPath());
+    QString reduceLispFile(QString fileData);
+    QByteArray lispPackImports(QString codeStr, QString editorPath = QDir::currentPath(), bool reduceLisp = false);
     QPair<QString, QList<QPair<QString, QByteArray> > > lispUnpackImports(QByteArray data);
     bool lispUpload(VByteArray vb);
-    bool lispUpload(QString codeStr, QString editorPath = QDir::currentPath());
+    bool lispUpload(QString codeStr, QString editorPath = QDir::currentPath(), bool reduceLisp = false);
+    Q_INVOKABLE bool lispUploadFromPath(QString path, bool reduceLisp);
     bool lispStream(VByteArray vb, qint8 mode);
     QString lispRead(QWidget *parent, QString &lispPath);
 
@@ -55,11 +57,19 @@ public:
     Q_INVOKABLE QVariantList reloadPackageArchive();
     Q_INVOKABLE bool downloadPackageArchive();
 
+    Q_INVOKABLE void abortDownloadUpload();
+
+    bool createPackageFromDescription(QString path, VescPackage *pkgRes = nullptr, bool reduceLisp = false);
+    Q_INVOKABLE bool shouldShowPackage(VescPackage pkg);
+    Q_INVOKABLE static bool shouldShowPackageFromRxp(VescPackage pkg, FW_RX_PARAMS rxp, bool *runOk = nullptr);
+
 signals:
     void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
+    void lispUploadProgress(qint64 bytes, qint64 bytesTotal);
 
 private:
     VescInterface *mVesc;
+    bool mAbortDownloadUpload;
     bool getImportFromLine(QString line, QString &path, QString &tag, bool &isInvalid);
 
 };

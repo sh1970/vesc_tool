@@ -39,6 +39,7 @@
 #include <QPixmapCache>
 
 #include "maddy/parser.h"
+#include "heatshrink/heatshrinkif.h"
 
 #ifdef Q_OS_ANDROID
 #include <QtAndroid>
@@ -270,25 +271,8 @@ QString Utility::uuid2Str(QByteArray uuid, bool space)
 
 bool Utility::requestFilePermission()
 {
-#ifdef Q_OS_ANDROID
-#if QT_VERSION >= QT_VERSION_CHECK(5, 10, 0)
-    // https://codereview.qt-project.org/#/c/199162/
-    QtAndroid::PermissionResult r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-    if(r == QtAndroid::PermissionResult::Denied) {
-        QtAndroid::requestPermissionsSync( QStringList() << "android.permission.WRITE_EXTERNAL_STORAGE", 10000);
-        r = QtAndroid::checkPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-        if(r == QtAndroid::PermissionResult::Denied) {
-            return false;
-        }
-    }
-
+    // Not working since android 13, can only write files
     return true;
-#else
-    return true;
-#endif
-#else
-    return true;
-#endif
 }
 
 bool Utility::requestBleScanPermission()
@@ -556,7 +540,7 @@ QString Utility::detectAllFoc(VescInterface *vesc,
             case -100 + FAULT_CODE_DRV: reason = "DRV fault, hardware fault occured. Check there are no shorts"; break;
             case -100 + FAULT_CODE_ABS_OVER_CURRENT: reason = "Overcurrent fault, Check there are no shorts and ABS Overcurrent limit is sensible"; break;
             case -100 + FAULT_CODE_OVER_TEMP_FET: reason = "Mosfet Overtemperature fault, Mosfets overheated, check for shorts. Cool down device"; break;
-            case -100 + FAULT_CODE_OVER_TEMP_MOTOR: reason = "Motor Overtemperature fault, Motor overheaded, is the current limit OK?"; break;
+            case -100 + FAULT_CODE_OVER_TEMP_MOTOR: reason = "Motor Overtemperature fault, Motor overheated, is the current limit OK?"; break;
             case -100 + FAULT_CODE_GATE_DRIVER_OVER_VOLTAGE: reason = "Gate Driver over voltage, check for hardware failure"; break;
             case -100 + FAULT_CODE_GATE_DRIVER_UNDER_VOLTAGE: reason = "Gate Driver under voltage, check for hardware failure"; break;
             case -100 + FAULT_CODE_MCU_UNDER_VOLTAGE: reason = "MCU under voltage, check for hardware failure, shorts on outputs"; break;
@@ -1468,7 +1452,7 @@ uint32_t Utility::crc32c(uint8_t *data, uint32_t len)
     return ~crc;
 }
 
-bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params)
+bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params, int timeout)
 {
     bool res = false;
 
@@ -1484,7 +1468,7 @@ bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params)
                vesc, SLOT(fwVersionReceived(FW_RX_PARAMS)));
 
     vesc->commands()->getFwVersion();
-    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), 4000);
+    waitSignal(vesc->commands(), SIGNAL(fwVersionReceived(FW_RX_PARAMS)), timeout);
 
     disconnect(conn);
 
@@ -1494,10 +1478,10 @@ bool Utility::getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params)
     return res;
 }
 
-bool Utility::getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId)
+bool Utility::getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId, int timeout)
 {
-    vesc->canTmpOverride(true, canId);
-    bool res = getFwVersionBlocking(vesc, params);
+    vesc->canTmpOverride(canId >= 0, canId);
+    bool res = getFwVersionBlocking(vesc, params, timeout);
     vesc->canTmpOverrideEnd();
     return res;
 }
@@ -1521,6 +1505,12 @@ FW_RX_PARAMS Utility::getFwVersionBlockingCan(VescInterface *vesc, int canId)
     FW_RX_PARAMS params;
     getFwVersionBlockingCan(vesc, &params, canId);
     return params;
+}
+
+bool Utility::pingConnectedDevice(VescInterface *vesc, int timeout)
+{
+    FW_RX_PARAMS params;
+    return getFwVersionBlocking(vesc, &params, timeout);
 }
 
 MC_VALUES Utility::getMcValuesBlocking(VescInterface *vesc)
@@ -1724,6 +1714,15 @@ void Utility::enuToLlh(const double *iLlh, const double *xyz, double *llh)
     double z = enuMat[2] * xyz[0] + enuMat[5] * xyz[1] + enuMat[8] * xyz[2] + iz;
 
     xyzToLlh(x, y, z, &llh[0], &llh[1], &llh[2]);
+}
+
+double Utility::distLlhToLlh(double lat, double lon, double height,
+                            double lat2, double lon2, double height2)
+{
+    double x, y, z, x2, y2, z2;
+    llhToXyz(lat, lon, height, &x, &y, &z);
+    llhToXyz(lat2, lon2, height2, &x2, &y2, &z2);
+    return sqrt(SQ(x - x2) + SQ(y - y2) + SQ(z - z2));
 }
 
 bool Utility::configCheckCompatibility(int fwMajor, int fwMinor)
@@ -2338,11 +2337,52 @@ bool Utility::downloadUrlEventloop(QString path, QString dest)
 QString Utility::md2html(QString md)
 {
     std::shared_ptr<maddy::ParserConfig> config = std::make_shared<maddy::ParserConfig>();
-    config->enabledParsers = maddy::types::ALL;
+    config->enabledParsers = maddy::types::DEFAULT;
     std::shared_ptr<maddy::Parser> parser = std::make_shared<maddy::Parser>(config);
 
     std::stringstream markdownInput(md.toStdString());
-    return QString::fromStdString(parser->Parse(markdownInput));
+
+    QString result = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n";
+    result.append(QString::fromStdString(parser->Parse(markdownInput)));
+
+    return result;
+}
+
+QByteArray Utility::readAllFromFile(const QString &filePath)
+{
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return QByteArray();
+    }
+    QByteArray data = file.readAll();
+    file.close();
+    return data;
+}
+
+QByteArray Utility::removeFirmwareHeader(QByteArray in)
+{
+    if (in.size() <= 6) {
+        return in;
+    }
+
+    VByteArray vb(in);
+    auto size = vb.vbPopFrontUint32();
+    bool isCompressed = (size >> 24) == 0xCC;
+    unsigned short crc = vb.vbPopFrontUint16();
+    unsigned short crcCalc = Packet::crc16((const unsigned char*)vb.constData(), uint32_t(vb.size()));
+
+    if (crc == crcCalc) {
+        if (isCompressed) {
+            qDebug() << "Decompressed and removed header from firmware file...";
+            HeatshrinkIf hs;
+            return hs.decode(vb);
+        } else {
+            qDebug() << "Removed header from firmware file...";
+            return vb;
+        }
+    } else {
+        return in;
+    }
 }
 
 void Utility::setDarkMode(bool isDarkSetting)

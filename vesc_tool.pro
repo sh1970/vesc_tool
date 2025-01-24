@@ -5,9 +5,9 @@
 #-------------------------------------------------
 
 # Version
-VT_VERSION = 6.05
+VT_VERSION = 6.06
 VT_INTRO_VERSION = 1
-VT_CONFIG_VERSION = 2
+VT_CONFIG_VERSION = 4
 
 # Set to 0 for stable versions and to test version number for development versions.
 VT_IS_TEST_VERSION = 2
@@ -15,9 +15,9 @@ VT_IS_TEST_VERSION = 2
 # GIT commit
 VT_GIT_COMMIT = $$system(git rev-parse --short=8 HEAD)
 
-VT_ANDROID_VERSION_ARMV7 = 134
-VT_ANDROID_VERSION_ARM64 = 135
-VT_ANDROID_VERSION_X86 = 136
+VT_ANDROID_VERSION_ARMV7 = 162
+VT_ANDROID_VERSION_ARM64 = 163
+VT_ANDROID_VERSION_X86 = 164
 
 VT_ANDROID_VERSION = $$VT_ANDROID_VERSION_X86
 
@@ -251,6 +251,12 @@ HEADERS  += mainwindow.h \
     tcpserversimple.h \
     hexfile.h
 
+unix: {
+!ios: {
+    HEADERS += systemcommandexecutor.h
+}
+}
+
 FORMS    += mainwindow.ui \
     boardsetupwindow.ui \
     parametereditor.ui \
@@ -280,10 +286,11 @@ RESOURCES += res.qrc \
     res_qml.qrc
 RESOURCES += res_config.qrc
 
+RESOURCES += res_fw_bms.qrc
+RESOURCES += res/firmwares_esp/res_fw_esp.qrc
+
 !exclude_fw {
-    RESOURCES += res_fw_bms.qrc
     RESOURCES += res/firmwares/res_fw.qrc
-    RESOURCES += res/firmwares_esp/res_fw_esp.qrc
 }
 
 build_original {

@@ -39,6 +39,7 @@ ConfigParams::ConfigParams(QObject *parent) : QObject(parent)
     mUpdatesEnabled = true;
     mConfigVersion = -1;
     mStoreConfigVersion = true;
+    mUpdateCnt = 0;
 }
 
 void ConfigParams::addParam(const QString &name, ConfigParam param)
@@ -195,6 +196,8 @@ double ConfigParams::getParamDouble(const QString &name)
 
         if (p.type == CFG_T_DOUBLE) {
             retVal = p.valDouble;
+        } else if (p.type == CFG_T_INT) {
+            retVal = double(p.valInt);
         } else {
             qWarning() << name << "wrong type";
         }
@@ -214,6 +217,8 @@ int ConfigParams::getParamInt(const QString &name)
 
         if (p.type == CFG_T_INT || p.type == CFG_T_BITFIELD) {
             retVal = p.valInt;
+        } else if (p.type == CFG_T_DOUBLE) {
+            retVal = int(p.valDouble);
         } else {
             qWarning() << name << "wrong type";
         }
@@ -840,6 +845,7 @@ void ConfigParams::updateParamString(QString name, QString param, QObject *src)
     if (mParams.contains(name)) {
         ConfigParam &p = mParams[name];
         if (p.type == CFG_T_QSTRING) {
+            param.truncate(p.maxLen);
             if (p.valString != param) {
                 p.valString = param;
                 emit paramChangedQString(src, name, param);
@@ -916,7 +922,13 @@ void ConfigParams::updateDone()
 {
     // Accept all names from now on again.
     mUpdateOnlyName.clear();
+    mUpdateCnt++;
     emit updated();
+}
+
+int ConfigParams::updateCnt() const
+{
+    return mUpdateCnt;
 }
 
 bool ConfigParams::getStoreConfigVersion() const

@@ -27,6 +27,7 @@
 #include <QDateTime>
 #include <QTime>
 #include <QMap>
+#include <cmath>
 #include <cstdint>
 #include "tcphub.h"
 
@@ -491,54 +492,6 @@ public:
 
 Q_DECLARE_METATYPE(STAT_VALUES)
 
-struct LOG_DATA {
-    Q_GADGET
-
-    Q_PROPERTY(MC_VALUES values MEMBER values)
-    Q_PROPERTY(SETUP_VALUES setupValues MEMBER setupValues)
-    Q_PROPERTY(IMU_VALUES imuValues MEMBER imuValues)
-    Q_PROPERTY(int valTime MEMBER valTime)
-    Q_PROPERTY(int posTime MEMBER posTime)
-    Q_PROPERTY(double lat MEMBER lat)
-    Q_PROPERTY(double lon MEMBER lon)
-    Q_PROPERTY(double alt MEMBER alt)
-    Q_PROPERTY(double gVel MEMBER gVel)
-    Q_PROPERTY(double vVel MEMBER vVel)
-    Q_PROPERTY(double hAcc MEMBER hAcc)
-    Q_PROPERTY(double vAcc MEMBER vAcc)
-
-public:
-    LOG_DATA() {
-        posTime = -1;
-        setupValTime = -1;
-        imuValTime = -1;
-        lat = 0.0;
-        lon = 0.0;
-        alt = 0.0;
-        gVel = 0.0;
-        vVel = 0.0;
-        hAcc = 0.0;
-        vAcc = 0.0;
-    }
-
-    MC_VALUES values;
-    SETUP_VALUES setupValues;
-    IMU_VALUES imuValues;
-    int valTime;
-    int setupValTime;
-    int imuValTime;
-    int posTime;
-    double lat;
-    double lon;
-    double alt;
-    double gVel;
-    double vVel;
-    double hAcc;
-    double vAcc;
-};
-
-Q_DECLARE_METATYPE(LOG_DATA)
-
 struct LOG_HEADER {
     Q_GADGET
 
@@ -740,6 +693,7 @@ struct BMS_VALUES {
     Q_PROPERTY(double wh_cnt_chg_total MEMBER wh_cnt_chg_total)
     Q_PROPERTY(double ah_cnt_dis_total MEMBER ah_cnt_dis_total)
     Q_PROPERTY(double wh_cnt_dis_total MEMBER wh_cnt_dis_total)
+    Q_PROPERTY(int data_version MEMBER data_version)
 
 public:
     BMS_VALUES() {
@@ -760,6 +714,7 @@ public:
         wh_cnt_chg_total = 0.0;
         ah_cnt_dis_total = 0.0;
         wh_cnt_dis_total = 0.0;
+        data_version = 0;
         updateTime = -1;
     }
 
@@ -799,6 +754,7 @@ public:
     double wh_cnt_chg_total;
     double ah_cnt_dis_total;
     double wh_cnt_dis_total;
+    int data_version;
     qint64 updateTime;
 };
 
@@ -882,7 +838,8 @@ typedef enum {
     DEBUG_SAMPLING_TRIGGER_FAULT,
     DEBUG_SAMPLING_TRIGGER_START_NOSEND,
     DEBUG_SAMPLING_TRIGGER_FAULT_NOSEND,
-    DEBUG_SAMPLING_SEND_LAST_SAMPLES
+    DEBUG_SAMPLING_SEND_LAST_SAMPLES,
+    DEBUG_SAMPLING_SEND_SINGLE_SAMPLE
 } debug_sampling_mode;
 
 typedef enum {
@@ -1248,8 +1205,10 @@ struct VescPackage {
 public:
     Q_PROPERTY(QString name MEMBER name)
     Q_PROPERTY(QString description MEMBER description)
+    Q_PROPERTY(QString description_md MEMBER description_md)
     Q_PROPERTY(QByteArray lispData MEMBER lispData)
     Q_PROPERTY(QString qmlFile MEMBER qmlFile)
+    Q_PROPERTY(QString pkgDescQml MEMBER pkgDescQml)
     Q_PROPERTY(bool qmlIsFullscreen MEMBER qmlIsFullscreen)
     Q_PROPERTY(bool isLibrary MEMBER isLibrary)
     Q_PROPERTY(bool loadOk MEMBER loadOk)
@@ -1265,8 +1224,10 @@ public:
     QByteArray compressedData;
     QString name;
     QString description;
+    QString description_md;
     QByteArray lispData;
     QString qmlFile;
+    QString pkgDescQml;
     bool qmlIsFullscreen;
     bool isLibrary;
     bool loadOk;
@@ -1304,6 +1265,92 @@ public:
 
 Q_DECLARE_METATYPE(TCP_HUB_DEVICE)
 
+#ifndef FE_WGS84
+#define FE_WGS84        (1.0/298.257223563) // earth flattening (WGS84)
+#endif
+#ifndef RE_WGS84
+#define RE_WGS84        6378137.0           // earth semimajor axis (WGS84) (m)
+#endif
+#ifndef SQ
+#define SQ(x) ((x) * (x))
+#endif
+
+struct LOG_DATA {
+    Q_GADGET
+
+    Q_PROPERTY(MC_VALUES values MEMBER values)
+    Q_PROPERTY(SETUP_VALUES setupValues MEMBER setupValues)
+    Q_PROPERTY(IMU_VALUES imuValues MEMBER imuValues)
+    Q_PROPERTY(int valTime MEMBER valTime)
+    Q_PROPERTY(int posTime MEMBER posTime)
+    Q_PROPERTY(double lat MEMBER lat)
+    Q_PROPERTY(double lon MEMBER lon)
+    Q_PROPERTY(double alt MEMBER alt)
+    Q_PROPERTY(double gVel MEMBER gVel)
+    Q_PROPERTY(double vVel MEMBER vVel)
+    Q_PROPERTY(double hAcc MEMBER hAcc)
+    Q_PROPERTY(double vAcc MEMBER vAcc)
+
+public:
+    LOG_DATA() {
+        posTime = -1;
+        setupValTime = -1;
+        imuValTime = -1;
+        lat = 0.0;
+        lon = 0.0;
+        alt = 0.0;
+        gVel = 0.0;
+        vVel = 0.0;
+        hAcc = 0.0;
+        vAcc = 0.0;
+    }
+
+    double distanceTo(double latOther, double lonOther, double heightOther) const
+    {
+        double xyz[3];
+        llhToXyz(lat, lon, alt, xyz);
+        double xyzOther[3];
+        llhToXyz(latOther, lonOther, heightOther, xyzOther);
+        return sqrt(SQ(xyzOther[0] - xyz[0]) + SQ(xyzOther[1] - xyz[1]) + SQ(xyzOther[2] - xyz[2]));
+    }
+
+    double distanceTo(const LOG_DATA &other) const
+    {
+        return distanceTo(other.lat, other.lon, other.alt);
+    }
+
+    void llhToXyz(double lat, double lon, double height, double *xyz) const
+    {
+        double sinp = sin(lat * M_PI / 180.0);
+        double cosp = cos(lat * M_PI / 180.0);
+        double sinl = sin(lon * M_PI / 180.0);
+        double cosl = cos(lon * M_PI / 180.0);
+        double e2 = FE_WGS84 * (2.0 - FE_WGS84);
+        double v = RE_WGS84 / sqrt(1.0 - e2 * sinp * sinp);
+
+        xyz[0] = (v + height) * cosp * cosl;
+        xyz[1] = (v + height) * cosp * sinl;
+        xyz[2] = (v * (1.0 - e2) + height) * sinp;
+    }
+
+    MC_VALUES values;
+    SETUP_VALUES setupValues;
+    IMU_VALUES imuValues;
+    int valTime;
+    int setupValTime;
+    int imuValTime;
+    int posTime;
+    double lat;
+    double lon;
+    double alt;
+    double gVel;
+    double vVel;
+    double hAcc;
+    double vAcc;
+};
+
+Q_DECLARE_METATYPE(LOG_DATA)
+
 struct GNSS_DATA {
     Q_GADGET
 
@@ -1332,6 +1379,20 @@ public:
         age_s = 0.0;
     }
 
+    double distanceTo(double latOther, double lonOther, double heightOther) const
+    {
+        double xyz[3];
+        llhToXyz(lat, lon, height, xyz);
+        double xyzOther[3];
+        llhToXyz(latOther, lonOther, heightOther, xyzOther);
+        return sqrt(SQ(xyzOther[0] - xyz[0]) + SQ(xyzOther[1] - xyz[1]) + SQ(xyzOther[2] - xyz[2]));
+    }
+
+    double distanceTo(const GNSS_DATA &other) const
+    {
+        return distanceTo(other.lat, other.lon, other.height);
+    }
+
     double lat;
     double lon;
     double height;
@@ -1342,6 +1403,20 @@ public:
     int mo;
     int dd;
     double age_s;
+
+    void llhToXyz(double lat, double lon, double height, double *xyz) const
+    {
+        double sinp = sin(lat * M_PI / 180.0);
+        double cosp = cos(lat * M_PI / 180.0);
+        double sinl = sin(lon * M_PI / 180.0);
+        double cosl = cos(lon * M_PI / 180.0);
+        double e2 = FE_WGS84 * (2.0 - FE_WGS84);
+        double v = RE_WGS84 / sqrt(1.0 - e2 * sinp * sinp);
+
+        xyz[0] = (v + height) * cosp * cosl;
+        xyz[1] = (v + height) * cosp * sinl;
+        xyz[2] = (v * (1.0 - e2) + height) * sinp;
+    }
 };
 
 Q_DECLARE_METATYPE(GNSS_DATA)

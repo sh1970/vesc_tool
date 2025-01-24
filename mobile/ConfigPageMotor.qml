@@ -32,7 +32,6 @@ Item {
     property Commands mCommands: VescIf.commands()
     property bool isHorizontal: width > height
 
-
     ParamEditors {
         id: editors
     }
@@ -74,6 +73,52 @@ Item {
         DirectionSetup {
             id: directionSetup
             anchors.fill: parent
+        }
+    }
+
+    Dialog {
+        id: measureOffsetDialog
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        modal: true
+        focus: true
+        width: parent.width - 20
+        closePolicy: Popup.CloseOnEscape
+        title: "Measure Offsets"
+
+        x: 10
+        y: Math.max((parent.height - height) / 2, 10)
+        parent: ApplicationWindow.overlay
+
+        Overlay.modal: Rectangle {
+            color: "#AA000000"
+        }
+
+        Text {
+            anchors.fill: parent
+            id: detectLambdaLabel
+            color: Utility.getAppHexColor("lightText")
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.WordWrap
+            text:
+                "This is going to measure and store all offsets. Make sure " +
+                "that the motor is not moving or disconnected. Motor rotation " +
+                "during the measurement will cause an invalid result. Do you " +
+                "want to continue?"
+        }
+
+        Timer {
+            id: offsetReadConfTimer
+            interval: 5000
+            repeat: false
+            running: false
+            onTriggered: {
+                mCommands.getMcconf()
+            }
+        }
+
+        onAccepted: {
+            mCommands.sendTerminalCmd("foc_dc_cal")
+            offsetReadConfTimer.restart()
         }
     }
 
@@ -155,11 +200,12 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             contentWidth: column.width
+            contentHeight: scrollCol.preferredHeight
             clip: true
 
             GridLayout {
                 id: scrollCol
-                anchors.fill: parent
+                width: column.width
                 columns: isHorizontal ? 2 : 1
             }
         }
@@ -202,8 +248,6 @@ Item {
                     y: parent.height - implicitHeight
                     width: parent.width
 
-
-
                     MenuItem {
                         text: "Read Default Settings"
                         onTriggered: {
@@ -232,6 +276,16 @@ Item {
                         text: "Detect FOC Encoder..."
                         onTriggered: {
                             detectFocEncoder.openDialog()
+                        }
+                    }
+                    MenuItem {
+                        text: "Measure FOC Offsets"
+                        onTriggered: {
+                            if (VescIf.isPortConnected()) {
+                                measureOffsetDialog.open()
+                            } else {
+                                VescIf.emitMessageDialog("Measure FOC Offsets", "Not Connected", false, false)
+                            }
                         }
                     }
                     MenuItem {
