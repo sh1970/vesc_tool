@@ -25,6 +25,13 @@
 #include <QMessageBox>
 #include <cmath>
 #include <QStandardPaths>
+#include <QScrollBar>
+
+static const int dataTableColName = 0;
+static const int dataTableColValue = 1;
+static const int dataTableColY1 = 2;
+static const int dataTableColY2 = 3;
+static const int dataTableColScale = 4;
 
 PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     QWidget(parent),
@@ -69,11 +76,33 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
     ui->plot->axisRect()->setRangeZoom(Qt::Orientations());
     ui->plot->axisRect()->setRangeDrag(Qt::Orientations());
 
-    ui->dataTable->setColumnWidth(0, 140);
-    ui->dataTable->setColumnWidth(1, 120);
     ui->statTable->setColumnWidth(0, 140);
     ui->logTable->setColumnWidth(0, 250);
     ui->vescLogTable->setColumnWidth(0, 250);
+
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColName, QHeaderView::Interactive);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColValue, QHeaderView::Stretch);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColY1, QHeaderView::Fixed);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColY2, QHeaderView::Fixed);
+    ui->dataTable->horizontalHeader()->setSectionResizeMode(dataTableColScale, QHeaderView::Fixed);
+
+    ui->dataTable->setColumnWidth(dataTableColY1, 30);
+    ui->dataTable->setColumnWidth(dataTableColY2, 30);
+    ui->dataTable->setColumnWidth(dataTableColScale, 60);
+
+    connect(ui->dataTable, &QTableWidget::itemChanged, [this](QTableWidgetItem *item) {
+        if (item->checkState() == Qt::Checked) {
+            if (item->column() == dataTableColY1){
+                ui->dataTable->item(item->row(), dataTableColY2)->setCheckState(Qt::Unchecked);
+            }
+            if (item->column() == dataTableColY2) {
+                ui->dataTable->item(item->row(), dataTableColY1)->setCheckState(Qt::Unchecked);
+            }
+        }
+        if (item->column() > dataTableColValue) {
+            updateGraphs();
+        }
+    });
 
     m3dView = new Vesc3DView(this);
     m3dView->setMinimumWidth(200);
@@ -222,11 +251,19 @@ PageLogAnalysis::PageLogAnalysis(QWidget *parent) :
 
     connect(ui->filterhAccBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             [this](double newVal) {
-        (void)newVal;
-        if (ui->filterOutlierBox->isChecked()) {
-            truncateDataAndPlot(ui->autoZoomBox->isChecked());
-        }
-    });
+                (void)newVal;
+                if (ui->filterOutlierBox->isChecked()) {
+                    truncateDataAndPlot(ui->autoZoomBox->isChecked());
+                }
+            });
+
+    connect(ui->filterdMaxBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            [this](double newVal) {
+                (void)newVal;
+                if (ui->filterOutlierBox->isChecked()) {
+                    truncateDataAndPlot(ui->autoZoomBox->isChecked());
+                }
+            });
 
     connect(ui->tabWidget, &QTabWidget::currentChanged, [this](int index) {
         (void)index;
@@ -305,6 +342,10 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
                 fieldNum++;
             }
 
+            if (fieldNum >= 0) {
+                return;
+            }
+
             mLogRtHeader.resize(fieldNum);
 
             if (mLogRtAppendTime) {
@@ -381,11 +422,6 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
             if (val.ms_today != mGnssMsTodayLast) {
                 mGnssMsTodayLast = val.ms_today;
 
-                if (ui->filterOutlierBox->isChecked() &&
-                        (val.hdop * 5.0) > ui->filterhAccBox->value()) {
-                    return;
-                }
-
                 double llh[3];
                 double i_llh[3];
                 double xyz[3];
@@ -394,6 +430,16 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
                 llh[0] = val.lat;
                 llh[1] = val.lon;
                 llh[2] = val.height;
+
+                if (ui->filterOutlierBox->isChecked()) {
+                    if ((val.hdop * 5.0) > ui->filterhAccBox->value()) {
+                        return;
+                    }
+
+                    if (val.distanceTo(i_llh[0], i_llh[1], i_llh[2]) > (ui->filterdMaxBox->value() * 1000.0)) {
+                        return;
+                    }
+                }
 
                 Utility::llhToEnu(i_llh, llh, xyz);
 
@@ -424,6 +470,11 @@ void PageLogAnalysis::setVesc(VescInterface *vesc)
 
 void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
 {
+    if (log.isEmpty()) {
+        mVesc->emitMessageDialog("Load Log", "No data", false);
+        return;
+    }
+    ui->currentLog->setText("Realtime");
     storeSelection();
 
     resetInds();
@@ -485,26 +536,34 @@ void PageLogAnalysis::loadVescLog(QVector<LOG_DATA> log)
     mLogHeader.append(LOG_HEADER("gnss_v_acc", "V. Accuracy GNSS", "m"));
     mLogHeader.append(LOG_HEADER("num_vesc", "VESC num", "", 0));
 
-    double i_llh[3];
-    for (auto d: log) {
-        if (d.posTime >= 0 && (!ui->filterOutlierBox->isChecked() ||
-                               d.hAcc < ui->filterhAccBox->value())) {
-            i_llh[0] = d.lat;
-            i_llh[1] = d.lon;
-            i_llh[2] = d.alt;
-            ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
-            break;
+    LOG_DATA bestPoint = log.first();
+    foreach (auto &d, log) {
+        if (d.posTime >= 0 && d.hAcc > 0.0) {
+            if (d.hAcc < bestPoint.hAcc || bestPoint.hAcc <= 0.0) {
+                bestPoint = d;
+            }
         }
+    }
+
+    if (bestPoint.posTime >= 0) {
+        double i_llh[3];
+        i_llh[0] = bestPoint.lat;
+        i_llh[1] = bestPoint.lon;
+        i_llh[2] = bestPoint.alt;
+        ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
     }
 
     LOG_DATA prevSampleGnss;
     bool prevSampleGnssSet = false;
     double metersGnss = 0.0;
 
-    for (auto d: log) {
+    foreach (auto &d, log) {
         if (d.posTime >= 0 &&
-                (!ui->filterOutlierBox->isChecked() ||
-                 d.hAcc < ui->filterhAccBox->value())) {
+            (!ui->filterOutlierBox->isChecked() ||
+                               (
+                                   d.hAcc < ui->filterhAccBox->value()) &&
+                                   d.distanceTo(bestPoint) < (ui->filterdMaxBox->value() * 1000.0)
+                               )) {
             if (prevSampleGnssSet) {
                 double i_llh[3];
                 double llh[3];
@@ -623,7 +682,7 @@ void PageLogAnalysis::on_openCsvButton_clicked()
 
             QFile inFile(fileName);
             if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                openLog(inFile.readAll());
+                openLog("Local: " + fileName, inFile.readAll());
             }
         }
     }
@@ -709,17 +768,21 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
             } else {
                 llh[2] = 0.0;
             }
-            Utility::llhToEnu(i_llh, llh, xyz);
 
-            LocPoint p;
-            p.setXY(xyz[0], xyz[1]);
-            p.setRadius(5);
+            if (!ui->filterOutlierBox->isChecked() ||
+                Utility::distLlhToLlh(llh[0], llh[1], 0.0, i_llh[0], i_llh[1], 0.0) < (ui->filterdMaxBox->value() * 1000.0)) {
+                Utility::llhToEnu(i_llh, llh, xyz);
 
-            if (mInd_t_day >= 0) {
-                p.setInfo(QString("%1").arg(d[mInd_t_day]));
+                LocPoint p;
+                p.setXY(xyz[0], xyz[1]);
+                p.setRadius(5);
+
+                if (mInd_t_day >= 0) {
+                    p.setInfo(QString("%1").arg(d[mInd_t_day]));
+                }
+
+                ui->map->addInfoPoint(p, false);
             }
-
-            ui->map->addInfoPoint(p, false);
         }
     }
 
@@ -734,7 +797,26 @@ void PageLogAnalysis::truncateDataAndPlot(bool zoomGraph)
 
 void PageLogAnalysis::updateGraphs()
 {
-    auto rows = ui->dataTable->selectionModel()->selectedRows();
+    QSet<QModelIndex> uniqueRows;
+
+    auto selectedRows = ui->dataTable->selectionModel()->selectedRows();
+    for (const QModelIndex &index : selectedRows) {
+        uniqueRows.insert(index);
+    }
+
+    for (int row = 0; row < ui->dataTable->rowCount(); ++row) {
+        QTableWidgetItem *item;
+        item = ui->dataTable->item(row, dataTableColY1);
+        if (item && item->checkState() == Qt::Checked) {
+            uniqueRows.insert(ui->dataTable->model()->index(row, dataTableColName));
+        }
+        item = ui->dataTable->item(row, dataTableColY2);
+        if (item && item->checkState() == Qt::Checked) {
+            uniqueRows.insert(ui->dataTable->model()->index(row, dataTableColName));
+        }
+    }
+
+    auto rows = uniqueRows.values();
 
     QVector<double> xAxis;
     QVector<QVector<double> > yAxes;
@@ -766,7 +848,7 @@ void PageLogAnalysis::updateGraphs()
             int row = rows.at(r).row();
             double rowScale = 1.0;
             if(QDoubleSpinBox *sb = qobject_cast<QDoubleSpinBox*>
-                    (ui->dataTable->cellWidget(row, 2))) {
+                    (ui->dataTable->cellWidget(row, dataTableColScale))) {
                 rowScale = sb->value();
             }
 
@@ -784,6 +866,7 @@ void PageLogAnalysis::updateGraphs()
     }
 
     ui->plot->clearGraphs();
+    ui->plot->yAxis2->setVisible(false);
 
     for (int i = 0;i < yAxes.size();i++) {
         QPen pen = QPen(Utility::getAppQColor("plot_graph1"));
@@ -800,7 +883,21 @@ void PageLogAnalysis::updateGraphs()
             pen = QPen(Utility::getAppQColor("plot_graph4"));
         }
 
-        ui->plot->addGraph();
+        auto row = rows.at(i).row();
+
+        bool y2Axis = false;
+        
+        if(QTableWidgetItem *y2Widget = ui->dataTable->item(row, dataTableColY2)) {
+            y2Axis = (y2Widget->checkState() == Qt::Checked);
+        }
+
+        if(y2Axis){
+            ui->plot->addGraph(ui->plot->xAxis, ui->plot->yAxis2);
+            ui->plot->yAxis2->setVisible(true);
+        } else{
+            ui->plot->addGraph();
+        }
+
         ui->plot->graph(i)->setPen(pen);
         ui->plot->graph(i)->setName(names.at(i));
         ui->plot->graph(i)->setData(xAxis, yAxes.at(i));
@@ -968,13 +1065,13 @@ void PageLogAnalysis::updateDataAndPlot(double time)
             if (header.isTimeStamp) {
                 QTime t(0, 0, 0, 0);
                 t = t.addMSecs(value * 1000);
-                ui->dataTable->item(ind, 1)->setText(t.toString("hh:mm:ss.zzz"));
+                ui->dataTable->item(ind, dataTableColValue)->setText(t.toString("hh:mm:ss.zzz"));
             } else {
-                ui->dataTable->item(ind, 1)->setText(
+                ui->dataTable->item(ind, dataTableColValue)->setText(
                             QString::number(value, 'f', header.precision) + " " + header.unit);
             }
         } else {
-            ui->dataTable->item(ind, 1)->setText(Commands::faultToStr(mc_fault_code(round(value))).mid(11));
+            ui->dataTable->item(ind, dataTableColValue)->setText(Commands::faultToStr(mc_fault_code(round(value))).mid(11));
         }
 
         ind++;
@@ -1009,18 +1106,22 @@ void PageLogAnalysis::updateDataAndPlot(double time)
         } else {
             llh[2] = 0.0;
         }
-        Utility::llhToEnu(i_llh, llh, xyz);
 
-        LocPoint p;
-        p.setXY(xyz[0], xyz[1]);
-        p.setRadius(10);
+        if (!ui->filterOutlierBox->isChecked() ||
+            Utility::distLlhToLlh(llh[0], llh[1], 0.0, i_llh[0], i_llh[1], 0.0) < (ui->filterdMaxBox->value() * 1000.0)) {
+            Utility::llhToEnu(i_llh, llh, xyz);
 
-        ui->map->setInfoTraceNow(1);
-        ui->map->clearInfoTrace();
-        ui->map->addInfoPoint(p);
+            LocPoint p;
+            p.setXY(xyz[0], xyz[1]);
+            p.setRadius(10);
 
-        if (ui->followBox->isChecked()) {
-            ui->map->moveView(xyz[0], xyz[1]);
+            ui->map->setInfoTraceNow(1);
+            ui->map->clearInfoTrace();
+            ui->map->addInfoPoint(p);
+
+            if (ui->followBox->isChecked()) {
+                ui->map->moveView(xyz[0], xyz[1]);
+            }
         }
     }
 
@@ -1076,11 +1177,31 @@ void PageLogAnalysis::logListRefresh()
 {
     ui->logTable->setRowCount(0);
     QSettings set;
-    if (set.contains("pageloganalysis/lastdir")) {
+    if (set.contains("pageloganalysis/lastdir")) {    
         QString dirPath = set.value("pageloganalysis/lastdir").toString();
+
+        while (dirPath.startsWith("/..")) {
+            dirPath.remove(0, 3);
+        }
+        set.setValue("pageloganalysis/lastdir", dirPath);
+
+        ui->pathLabel->setText(dirPath);
+
         QDir dir(dirPath);
         if (dir.exists()) {
-            for (QFileInfo f: dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV",
+            foreach (QFileInfo d, dir.entryInfoList(QDir::Dirs | QDir::NoDot, QDir::Name)) {
+                if (d.fileName() == ".." && dirPath == "/") {
+                    continue;
+                }
+
+                QTableWidgetItem *itName = new QTableWidgetItem(d.fileName());
+                itName->setData(Qt::UserRole, d.absoluteFilePath());
+                ui->logTable->setRowCount(ui->logTable->rowCount() + 1);
+                ui->logTable->setItem(ui->logTable->rowCount() - 1, 0, itName);
+                ui->logTable->setItem(ui->logTable->rowCount() - 1, 1,
+                                      new QTableWidgetItem("Folder"));
+            }
+            foreach (QFileInfo f, dir.entryInfoList(QStringList() << "*.csv" << "*.Csv" << "*.CSV",
                                                 QDir::Files, QDir::Name)) {
                 QTableWidgetItem *itName = new QTableWidgetItem(f.fileName());
                 itName->setData(Qt::UserRole, f.absoluteFilePath());
@@ -1096,12 +1217,27 @@ void PageLogAnalysis::logListRefresh()
     }
 }
 
+void PageLogAnalysis::on_logListUpButton_clicked()
+{
+    QSettings set;
+    if (set.contains("pageloganalysis/lastdir")) {
+        QString dirPath = set.value("pageloganalysis/lastdir").toString();
+        QDir dir(dirPath);
+        dir.cdUp();
+        set.setValue("pageloganalysis/lastdir", dir.absolutePath());
+        logListRefresh();
+    }
+}
+
 void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep, double scaleMax)
 {
     ui->dataTable->setRowCount(ui->dataTable->rowCount() + 1);
-    auto item1 = new QTableWidgetItem(name);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 0, item1);
-    ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 1, new QTableWidgetItem(""));
+    auto currentRow = ui->dataTable->rowCount() - 1;
+    
+    auto nameItem = new QTableWidgetItem(name);
+    ui->dataTable->setItem(currentRow, dataTableColName, nameItem);
+    ui->dataTable->setItem(currentRow, dataTableColValue, new QTableWidgetItem(""));
+
     if (hasScale) {
         QDoubleSpinBox *sb = new QDoubleSpinBox;
         sb->setSingleStep(scaleStep);
@@ -1109,21 +1245,33 @@ void PageLogAnalysis::addDataItem(QString name, bool hasScale, double scaleStep,
         sb->setMaximum(scaleMax);
         // Prevent mouse wheel focus to avoid changing the selection
         sb->setFocusPolicy(Qt::StrongFocus);
-        ui->dataTable->setCellWidget(ui->dataTable->rowCount() - 1, 2, sb);
+        ui->dataTable->setCellWidget(currentRow, dataTableColScale, sb);
         connect(sb, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                 [this](double value) {
             (void)value;
             updateGraphs();
         });
+
+    // Y1
+    QTableWidgetItem *y1Item = new QTableWidgetItem("");
+    y1Item->setCheckState(Qt::Unchecked);
+    ui->dataTable->setItem(currentRow, dataTableColY1, y1Item);
+
+    // Y2
+    QTableWidgetItem *y2Item = new QTableWidgetItem("");
+    y2Item->setCheckState(Qt::Unchecked);
+    ui->dataTable->setItem(currentRow, dataTableColY2, y2Item);
+
     } else {
-        ui->dataTable->setItem(ui->dataTable->rowCount() - 1, 2, new QTableWidgetItem("Not Plottable"));
+        ui->dataTable->setItem(currentRow, dataTableColScale, new QTableWidgetItem("N/A"));
     }
 }
 
-void PageLogAnalysis::openLog(QByteArray data)
+void PageLogAnalysis::openLog(QString name, QByteArray data)
 {
     storeSelection();
-
+    // get label for current open file
+    ui->currentLog->setText(name);
     QTextStream in(&data);
     auto tokensLine1 = in.readLine().split(";");
     if (tokensLine1.size() < 1) {
@@ -1144,7 +1292,7 @@ void PageLogAnalysis::openLog(QByteArray data)
 
         QVector<double> entryLastData;
 
-        for (auto t: tokensLine1) {
+        foreach (auto &t, tokensLine1) {
             auto token = t.split(":");
             LOG_HEADER h;
             for (int i = 0;i < t.size();i++) {
@@ -1213,11 +1361,12 @@ void PageLogAnalysis::generateMissingEntries()
 
     updateInds();
 
+    // Initialize map enu ref
     if (mInd_gnss_lat >= 0 && mInd_gnss_lon >= 0) {
-
-        // Initialize map enu ref
+        double haccBest = 100000.0;
         double i_llh[3] = {57.71495867, 12.89134921, 220.0};
-        for (auto d: mLog) {
+
+        foreach (auto &d, mLog) {
             double lat = d.at(mInd_gnss_lat);
             double lon = d.at(mInd_gnss_lon);
             double alt = 0;
@@ -1230,20 +1379,55 @@ void PageLogAnalysis::generateMissingEntries()
                 hacc = d.at(mInd_gnss_h_acc);
             }
 
-            if (hacc > 0.0 && (!ui->filterOutlierBox->isChecked() ||
-                             hacc < ui->filterhAccBox->value())) {
+            if (hacc > 0.0 && hacc < haccBest) {
+                haccBest = hacc;
                 i_llh[0] = lat;
                 i_llh[1] = lon;
                 i_llh[2] = alt;
-                ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
+            }
+
+            // Use first point when hacc is not available
+            if (mInd_gnss_h_acc < 0) {
                 break;
             }
         }
 
-        // Create GNSS trip counter if it is missing
-        if (mInd_trip_vesc < 0) {
-            mLogHeader.append(LOG_HEADER("trip_gnss", "Trip GNSS", "m", 3, true));
+        ui->map->setEnuRef(i_llh[0], i_llh[1], i_llh[2]);
 
+        bool tripEmpty = true;
+
+        if (mInd_trip_gnss < 0) {
+            mInd_trip_gnss = mLogHeader.size();
+            mLogHeader.append(LOG_HEADER("trip_gnss", "Trip GNSS", "m", 3, true));
+            for (int i = 0;i < mLog.size();i++) {
+                mLog[i].append(0.0);
+            }
+        } else {
+            auto first = mLog.size() > 0 ? mLog.first().at(mInd_trip_gnss) : 0.0;
+            for (int i = 1;i < mLog.size();i++) {
+                if (mLog.at(i).at(mInd_trip_gnss) != first) {
+                    tripEmpty = false;
+                    break;
+                }
+            }
+
+            // Some logs have huge jumps. When that is the case we recompute
+            // the trip counter.
+            if (!tripEmpty) {
+                for (int i = 1;i < mLog.size();i++) {
+                    if (ui->filterOutlierBox->isChecked() &&
+                        fabs(mLog.at(i - 1).at(mInd_trip_gnss) - mLog.at(i).at(mInd_trip_gnss)) >
+                            (ui->filterdMaxBox->value() * 1000.0)) {
+                        tripEmpty = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        qDebug() << tripEmpty;
+
+        if (tripEmpty) {
             double prevSampleGnss[3];
             bool prevSampleGnssSet = false;
             double metersGnss = 0.0;
@@ -1251,7 +1435,7 @@ void PageLogAnalysis::generateMissingEntries()
             for (int i = 0;i < mLog.size();i++) {
                 double lat = mLog.at(i).at(mInd_gnss_lat);
                 double lon = mLog.at(i).at(mInd_gnss_lon);
-                double alt = 0;
+                double alt = 0.0;
                 if (mInd_gnss_alt >= 0) {
                     alt = mLog.at(i).at(mInd_gnss_alt);
                 }
@@ -1261,8 +1445,12 @@ void PageLogAnalysis::generateMissingEntries()
                     hacc = mLog.at(i).at(mInd_gnss_h_acc);
                 }
 
-                if (hacc > 0 && (!ui->filterOutlierBox->isChecked() ||
-                                 hacc < ui->filterhAccBox->value())) {
+                if (hacc > 0.0 && (!ui->filterOutlierBox->isChecked() ||
+                                   (
+                                       hacc < ui->filterhAccBox->value()) &&
+                                       Utility::distLlhToLlh(lat, lon, alt, i_llh[0], i_llh[1], i_llh[2]) <
+                                           (ui->filterdMaxBox->value() * 1000.0)
+                                   )) {
                     if (prevSampleGnssSet) {
                         double i_llh[3];
                         double llh[3];
@@ -1295,7 +1483,7 @@ void PageLogAnalysis::generateMissingEntries()
                     prevSampleGnss[2] = alt;
                 }
 
-                mLog[i].append(metersGnss);
+                mLog[i][mInd_trip_gnss] = metersGnss;
             }
         }
     }
@@ -1306,9 +1494,29 @@ void PageLogAnalysis::generateMissingEntries()
 void PageLogAnalysis::storeSelection()
 {
     mSelection.dataLabels.clear();
+    mSelection.checkedY1Boxes.clear();
+    mSelection.checkedY2Boxes.clear();
+
+    // Selected rows
     foreach (auto i, ui->dataTable->selectionModel()->selectedRows()) {
-        mSelection.dataLabels.append(ui->dataTable->item(i.row(), 0)->text());
+        mSelection.dataLabels.append(ui->dataTable->item(i.row(), dataTableColName)->text());
     }
+
+    // Selected y1 and y2 boxes
+    for (int row = 0; row < ui->dataTable->rowCount(); row++) {
+        auto rowText = ui->dataTable->item(row, dataTableColName)->text();
+
+        QTableWidgetItem *itemY1 = ui->dataTable->item(row, dataTableColY1);
+        if (itemY1 != nullptr && itemY1->checkState() == Qt::Checked) {
+            mSelection.checkedY1Boxes.append(rowText);
+        }
+
+        QTableWidgetItem *itemY2 = ui->dataTable->item(row, dataTableColY2);
+        if (itemY2 != nullptr && itemY2->checkState() == Qt::Checked) {
+            mSelection.checkedY2Boxes.append(rowText);
+        }
+    }
+
     mSelection.scrollPos = ui->dataTable->verticalScrollBar()->value();
 }
 
@@ -1318,16 +1526,42 @@ void PageLogAnalysis::restoreSelection()
     auto modeOld = ui->dataTable->selectionMode();
     ui->dataTable->setSelectionMode(QAbstractItemView::MultiSelection);
     for (int row = 0;row < ui->dataTable->rowCount();row++) {
+        auto rowText = ui->dataTable->item(row, dataTableColName)->text();
         bool selected = false;
+        bool checkedY1 = false;
+        bool checkedY2 = false;
+
         foreach (auto i, mSelection.dataLabels) {
-            if (ui->dataTable->item(row, 0)->text() == i) {
+            if (rowText == i) {
                 selected = true;
+                break;
+            }
+        }
+
+        foreach (auto i, mSelection.checkedY1Boxes) {
+            if (rowText == i) {
+                checkedY1 = true;
+                break;
+            }
+        }
+
+        foreach (auto i, mSelection.checkedY2Boxes) {
+            if (rowText == i) {
+                checkedY2 = true;
                 break;
             }
         }
 
         if (selected) {
             ui->dataTable->selectRow(row);
+        }
+
+        if (checkedY1) {
+            ui->dataTable->item(row, dataTableColY1)->setCheckState(Qt::Checked);
+        }
+
+        if (checkedY2) {
+            ui->dataTable->item(row, dataTableColY2)->setCheckState(Qt::Checked);
         }
     }
     ui->dataTable->setSelectionMode(modeOld);
@@ -1399,11 +1633,18 @@ void PageLogAnalysis::on_logListOpenButton_clicked()
     if (items.size() > 0) {
         QString fileName = items.
                 first()->data(Qt::UserRole).toString();
+        
+        if (QDir(fileName).exists()) {
+            QSettings set;
+            set.setValue("pageloganalysis/lastdir", fileName);
+            logListRefresh();
+            return;
+        }
 
         QFile inFile(fileName);
         if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-            openLog(inFile.readAll());
-        }
+            openLog("Local: " + fileName, inFile.readAll());
+        } 
     } else {
         mVesc->emitMessageDialog("Open Log", "No Log Selected", false);
     }
@@ -1494,7 +1735,7 @@ void PageLogAnalysis::on_vescLogListOpenButton_clicked()
             auto data = mVesc->commands()->fileBlockRead(mVescLastPath + "/" + fe.name);
             setFileButtonsEnabled(true);
             if (!data.isEmpty()) {
-                openLog(data);
+                openLog("Device: " + fe.name, data);
             }
         }
     }

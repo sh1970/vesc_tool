@@ -140,7 +140,7 @@ private slots:
     void on_actionTerminalClear_triggered();
     void on_actionTerminalPrintThreads_triggered();
     void on_actionTerminalDRVResetLatchedFaults_triggered();
-    void on_actionCanFwd_toggled(bool arg1);
+    void on_actionCanFwd_triggered();
     void on_actionSafetyInformation_triggered();
     void on_actionWarrantyStatement_triggered();
     void on_actionVESCToolChangelog_triggered();
@@ -159,6 +159,7 @@ private slots:
     void on_canList_currentRowChanged(int currentRow);
     void on_actionGamepadControl_triggered(bool checked);   
     void on_actionPreferences_triggered();
+    void on_actionRestartLispBM_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -184,6 +185,7 @@ private:
     QTimer mPollImuTimer;
     QTimer mPollBmsTimer;
     QTimer mPortTimer;
+    QTimer mSettingSyncTimer;
 
     PageWelcome *mPageWelcome;
     PageConnection *mPageConnection;

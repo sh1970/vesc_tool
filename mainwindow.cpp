@@ -31,6 +31,7 @@
 #include <QProgressDialog>
 #include "parametereditor.h"
 #include "startupwizard.h"
+#include "widgets/experimentplot.h"
 #include "widgets/helpdialog.h"
 #include "utility.h"
 #include "widgets/paramdialog.h"
@@ -174,6 +175,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionWriteAppconf->setIcon(Utility::getIcon("icons/app_down.png"));
     ui->actionLaunchMobileTool->setIcon(Utility::getIcon("icons/v_icon-96.png"));
     ui->actionLaunchBoardConfigurator->setIcon(Utility::getIcon("icons/v_icon-96.png"));
+    ui->actionRestartLispBM->setIcon(Utility::getIcon("icons/Refresh-96.png"));
 
     QIcon mycon = QIcon(Utility::getIcon("icons/keys_off.png"));
     mycon.addPixmap(Utility::getIcon("icons/keys_on.png"), QIcon::Normal, QIcon::On);
@@ -389,6 +391,7 @@ MainWindow::MainWindow(QWidget *parent) :
             ui->pageList->item(mPageNameIdList.value("app_nrf"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_pas"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("app_imu"))->setHidden(true);
+            ui->pageList->item(mPageNameIdList.value("data_rt"))->setHidden(true);
             ui->pageList->item(mPageNameIdList.value("data_sampled"))->setHidden(true);
         }
     });
@@ -521,6 +524,16 @@ MainWindow::MainWindow(QWidget *parent) :
 
         ui->actionReconnect->setEnabled(!mVesc->isPortConnected());
         ui->actionDisconnect->setEnabled(mVesc->isPortConnected());
+    });
+
+    mSettingSyncTimer.start(10000);
+    connect(&mSettingSyncTimer, &QTimer::timeout, [this]() {
+        mPageEspProg->saveStateToSettings();
+        mPageFirmware->saveStateToSettings();
+        mPageLisp->saveStateToSettings();
+        mPageMotorComparison->saveStateToSettings();
+        mPageScripting->saveStateToSettings();
+        mPagePackage->saveStateToSettings();
     });
 
     // Restore size and position
@@ -767,43 +780,28 @@ void MainWindow::timerSlot()
         ui->canList->setEnabled(false);
     }
 
-    // If disconnected for a short time clear the can list so it scans on reconnect.
-    // Also disable CAN fwd for newer users who try to reconnect to non-existent CAN device from different setup.
-    static int disconected_cnt = 0;
-    disconected_cnt++;
-    if (disconected_cnt >= 40 && ui->canList->count() > 0) {
-        ui->canList->clear();
-        mVesc->commands()->setSendCan(false);
-        ui->scanCanButton->setEnabled(true);
-        ui->pageList->item(mPageNameIdList.value("app_custom_config_0"))->setHidden(true);
-        ui->pageList->item(mPageNameIdList.value("app_custom_config_1"))->setHidden(true);
-        ui->pageList->item(mPageNameIdList.value("app_custom_config_2"))->setHidden(true);
-    }
-
-    if (disconected_cnt >= 40 && !mVesc->isPortConnected()) {
-        ui->scanCanButton->setEnabled(true);
-    }
-
     if (!mVesc->isIgnoringCanChanges()) {
         // CAN fwd
         if (ui->actionCanFwd->isChecked() != mVesc->commands()->getSendCan()) {
             ui->actionCanFwd->setChecked(mVesc->commands()->getSendCan());
         }
 
-        if (mVesc->commands()->getSendCan()) {
-            int id_set = mVesc->commands()->getCanSendId();
-            for (int i = 1; i <  ui->canList->count(); i++) {
-                int id = 0;
-                auto current = ui->canList->itemWidget(ui->canList->item(i));
-                bool ok = QMetaObject::invokeMethod(current, "getID", Q_RETURN_ARG(int, id));
+        if (ui->canList->isEnabled()) {
+            if (mVesc->commands()->getSendCan()) {
+                int id_set = mVesc->commands()->getCanSendId();
+                for (int i = 1; i <  ui->canList->count(); i++) {
+                    int id = 0;
+                    auto current = ui->canList->itemWidget(ui->canList->item(i));
+                    bool ok = QMetaObject::invokeMethod(current, "getID", Q_RETURN_ARG(int, id));
 
-                if (ok && id == id_set) {
-                    ui->canList->setCurrentRow(i);
-                    break;
+                    if (ok && id == id_set) {
+                        ui->canList->setCurrentRow(i);
+                        break;
+                    }
                 }
+            } else {
+                ui->canList->setCurrentRow(0);
             }
-        } else {
-            ui->canList->setCurrentRow(0);
         }
     }
 
@@ -816,6 +814,11 @@ void MainWindow::timerSlot()
             mVesc->commands()->sendAlive();
         }
     }
+
+    // If disconnected for a short time clear the can list so it scans on reconnect.
+    // Also disable CAN fwd for newer users who try to reconnect to non-existent CAN device from different setup.
+    static int disconected_cnt = 0;
+    disconected_cnt++;
 
     // Read configurations if they haven't been read since starting VESC Tool
     if (mVesc->isPortConnected()) {
@@ -838,6 +841,19 @@ void MainWindow::timerSlot()
         }
     }
 
+    if (disconected_cnt >= 40 && ui->canList->count() > 0) {
+        ui->canList->clear();
+        mVesc->commands()->setSendCan(false);
+        ui->scanCanButton->setEnabled(true);
+        ui->pageList->item(mPageNameIdList.value("app_custom_config_0"))->setHidden(true);
+        ui->pageList->item(mPageNameIdList.value("app_custom_config_1"))->setHidden(true);
+        ui->pageList->item(mPageNameIdList.value("app_custom_config_2"))->setHidden(true);
+    }
+
+    if (disconected_cnt >= 40 && !mVesc->isPortConnected()) {
+        ui->scanCanButton->setEnabled(true);
+    }
+
     // Disable all data streaming when uploading firmware
     if (mVesc->getFwUploadProgress() > 0.1) {
         ui->actionSendAlive->setChecked(false);
@@ -846,6 +862,7 @@ void MainWindow::timerSlot()
         ui->actionIMU->setChecked(false);
         ui->actionKeyboardControl->setChecked(false);
         ui->actionrtDataBms->setChecked(false);
+        mPageLisp->disablePolling();
     }
 
     // Handle key events
@@ -1567,6 +1584,12 @@ void MainWindow::reloadPages()
     addPageItem(tr("Sampled Data"),  theme + "icons/Line Chart-96.png", "", false, true);
     mPageNameIdList.insert("data_sampled", ui->pageList->count() - 1);
 
+    auto experimentPlot = new ExperimentPlot(this);
+    experimentPlot->setVesc(mVesc);
+    ui->pageWidget->addWidget(experimentPlot);
+    addPageItem(tr("Experiment Plot"),  theme + "icons/rt_off.png", "", false, true);
+    mPageNameIdList.insert("data_experiment", ui->pageList->count() - 1);
+
     mPageImu = new PageImu(this);
     mPageImu->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageImu);
@@ -1610,7 +1633,7 @@ void MainWindow::reloadPages()
     mPageCanAnalyzer = new PageCanAnalyzer(this);
     mPageCanAnalyzer->setVesc(mVesc);
     ui->pageWidget->addWidget(mPageCanAnalyzer);
-    addPageItem(tr("CAN Analyzer"),  theme + "icons/can_off.png", "", false, true);
+    addPageItem(tr("CAN Tools"),  theme + "icons/can_off.png", "", false, true);
 
     mPageDisplayTool = new PageDisplayTool(this);
     ui->pageWidget->addWidget(mPageDisplayTool);
@@ -1656,6 +1679,7 @@ void MainWindow::reloadPages()
      * app_custom_config_2
      * data_rt
      * data_sampled
+     * data_experiment
      * data_imu
      * data_bms
      */
@@ -1921,15 +1945,17 @@ void MainWindow::on_actionTerminalDRVResetLatchedFaults_triggered()
     mVesc->commands()->sendTerminalCmd("drv_reset_faults");
 }
 
-void MainWindow::on_actionCanFwd_toggled(bool arg1)
+void MainWindow::on_actionCanFwd_triggered()
 {
-    if (arg1 && mVesc->commands()->getCanSendId() < 0) {
+    bool checked = ui->actionCanFwd->isChecked();
+
+    if (checked && mVesc->commands()->getCanSendId() < 0) {
         ui->actionCanFwd->setChecked(false);
         mVesc->emitMessageDialog("CAN Forward",
                                  "No CAN device is selected. Go to the connection page and select one.",
                                  false, false);
     } else {
-        mVesc->commands()->setSendCan(arg1);
+        mVesc->commands()->setSendCan(checked);
     }
 }
 
@@ -2046,8 +2072,9 @@ void MainWindow::on_scanCanButton_clicked()
 {
     if (mVesc->isPortConnected()) {
         ui->scanCanButton->setEnabled(false);
-        mVesc->commands()->setSendCan(false);
+        mVesc->canTmpOverride(false, -1);
         mVesc->commands()->pingCan();
+        mVesc->canTmpOverrideEnd();
         ui->canList->clear();
     } else {
         ui->canList->clear();
@@ -2066,6 +2093,8 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
     }
 
     ui->scanCanButton->setEnabled(false);
+    ui->canList->setEnabled(false);
+
     ui->canList->clear();
     FW_RX_PARAMS params;
     bool ok = false;
@@ -2082,8 +2111,9 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
         ui->canList->setItemWidget(item, li);
         ui->canList->addItem(item);
     }
+
     // Read local firmware version last so that firmware pages show the correct info.
-    ok = Utility::getFwVersionBlocking(mVesc, &params);
+    ok = Utility::getFwVersionBlockingCan(mVesc, &params, -1);
     item = new QListWidgetItem();
     item->setSizeHint(QSize(width,height));
     ui->canList->insertItem(0, item);
@@ -2091,12 +2121,17 @@ void MainWindow::pingCanRx(QVector<int> devs, bool isTimeout)
     ui->canList->setItemWidget(item, li);
     ui->canList->setIconSize(QSize(20,20));
     ui->canList->setGridSize(QSize(0.85*width , 1.25*height));
-    ui->canList->setCurrentRow(0);
+
+    ui->canList->setEnabled(true);
     ui->scanCanButton->setEnabled(true);
 }
 
 void MainWindow::on_canList_currentRowChanged(int currentRow)
 {
+    if (!ui->canList->isEnabled()) {
+        return;
+    }
+
     ui->canList->setEnabled(false);
 
     if (currentRow >= 0) {
@@ -2116,8 +2151,7 @@ void MainWindow::on_canList_currentRowChanged(int currentRow)
             bool ok = QMetaObject::invokeMethod(current, "getID", Q_RETURN_ARG(int, id));
             if (id >= 0 && id < 255  && ok) {
                 if (!mVesc->commands()->getSendCan() || mVesc->commands()->getCanSendId() != id) {
-                    mVesc->commands()->setCanSendId(quint32(id));
-                    mVesc->commands()->setSendCan(true);
+                    mVesc->commands()->setSendCan(true, quint32(id));
                     QTimer::singleShot(1500, [this]() {
                         if (mVesc->fwRx() && mVesc->getLastFwRxParams().hwType == HW_TYPE_VESC) {
                             mVesc->commands()->getMcconf();
@@ -2138,3 +2172,9 @@ void MainWindow::on_actionGamepadControl_triggered(bool checked)
         ui->actionGamepadControl->setChecked(false);
     }
 }
+
+void MainWindow::on_actionRestartLispBM_triggered()
+{
+    mVesc->commands()->lispSetRunning(1);
+}
+

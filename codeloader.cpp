@@ -1,5 +1,5 @@
 /*
-    Copyright 2022 Benjamin Vedder	benjamin@vedder.se
+    Copyright 2022 - 2025 Benjamin Vedder	benjamin@vedder.se
 
     This file is part of VESC Tool.
 
@@ -27,10 +27,15 @@
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QEventLoop>
+#include <QQmlEngine>
+#include <QQmlComponent>
+#include <QQuickItem>
 
 CodeLoader::CodeLoader(QObject *parent) : QObject(parent)
 {
     mVesc = nullptr;
+    mAbortDownloadUpload = false;
+    reloadPackageArchive();
 }
 
 VescInterface *CodeLoader::vesc() const
@@ -93,11 +98,75 @@ bool CodeLoader::lispErase(int size)
     return true;
 }
 
-QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
+QString CodeLoader::reduceLispFile(QString fileData)
+{
+    QString res;
+    auto lines = fileData.split("\n");
+
+    foreach (auto line, lines) {
+        bool insideString = false;
+        int indComment = -1;
+
+        // Find the earliest unquoted semicolon
+        for (int i = 0; i < line.length(); ++i) {
+            if (line[i] == '"') {
+                insideString = !insideString;
+            } else if (line[i] == ';' && !insideString) {
+                indComment = i;
+                break;
+            }
+        }
+
+        if (indComment >= 0) {
+            line.truncate(indComment);
+        }
+
+        while (line.startsWith(" ") || line.startsWith("\t")) {
+            line.remove(0, 1);
+        }
+
+        while (line.endsWith(" ") || line.endsWith("\t")) {
+            line.chop(1);
+        }
+
+        if (!line.startsWith("(import", Qt::CaseInsensitive) &&
+            !line.isEmpty()) {
+            res.append(line + "\n");
+        }
+    }
+
+    // Print files before and after reduction
+#if 0
+    QDir().mkpath("lispReduceBefore");
+    QDir().mkpath("lispReduceAfter");
+    int fileNum = QDir("lispReduceBefore").
+                  entryInfoList(QDir::NoFilter, QDir::Name).size();
+
+    QFile fBefore(QString("lispReduceBefore/lispBeforeReduce%1.lisp").arg(fileNum));
+    if (fBefore.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        fBefore.write(fileData.toUtf8());
+        fBefore.close();
+    }
+
+    QFile fAfter(QString("lispReduceAfter/lispAfterReduce%1.lisp").arg(fileNum));
+    if (fAfter.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        fAfter.write(res.toUtf8());
+        fAfter.close();
+    }
+#endif
+
+    return res;
+}
+
+QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath, bool reduceLisp)
 {
     VByteArray vb;
     vb.vbAppendUint16(0); // Flags: 0
-    vb.append(codeStr.toLocal8Bit());
+    if (reduceLisp) {
+        vb.append(reduceLispFile(codeStr).toLocal8Bit());
+    } else {
+        vb.append(codeStr.toLocal8Bit());
+    }
 
     if (vb.at(vb.size() - 1) != '\0') {
         vb.append('\0');
@@ -182,7 +251,7 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                                 files.append(qMakePair(tag, importData));
                             } else {
                                 bool found = false;
-                                for (auto i: imports.second) {
+                                foreach (auto i, imports.second) {
                                     if (i.first == pkgImportName) {
                                         auto importData = i.second;
                                         importData.append('\0'); // Pad with 0 in case it is a text file
@@ -201,6 +270,9 @@ QByteArray CodeLoader::lispPackImports(QString codeStr, QString editorPath)
                                 }
                             }
                         } else {
+                            if (reduceLisp && fi.absoluteFilePath().endsWith(".lisp", Qt::CaseInsensitive)) {
+                                fileData = reduceLispFile(QString::fromUtf8(fileData)).toUtf8();
+                            }
                             fileData.append('\0'); // Pad with 0 in case it is a text file
                             files.append(qMakePair(tag, fileData));
                         }
@@ -294,11 +366,11 @@ bool CodeLoader::lispUpload(VByteArray vb)
     data.append(vb);
 
     // The ESP32 partition table has 512k space for lisp scripts. The STM32
-    // has one 128k flash page.
+    // has one 128k flash page. Subtract 6 bytes for fw size and crc.
     auto fwParams = mVesc->getLastFwRxParams();
-    int max_size = 1024 * 500;
+    int max_size = 1024 * 512 - 6;
     if (fwParams.hwType == HW_TYPE_VESC) {
-        max_size = 1024 * 120;
+        max_size = 1024 * 128 - 6;
     }
 
     if (data.size() > max_size) {
@@ -341,9 +413,11 @@ bool CodeLoader::lispUpload(VByteArray vb)
         return res;
     };
 
+    auto sizeTotal = data.size();
     quint32 offset = 0;
     bool ok = true;
-    while (data.size() > 0) {
+    mAbortDownloadUpload = false;
+    while (data.size() > 0 && !mAbortDownloadUpload) {
         const int chunkSize = 384;
         int sz = data.size() > chunkSize ? chunkSize : data.size();
 
@@ -353,22 +427,49 @@ bool CodeLoader::lispUpload(VByteArray vb)
             break;
         }
 
+        emit lispUploadProgress(sizeTotal - data.size(), sizeTotal);
+
         offset += sz;
         data.remove(0, sz);
     }
 
+    if (mAbortDownloadUpload) {
+        ok = false;
+    }
+
+    emit lispUploadProgress(sizeTotal, sizeTotal);
+
     return ok;
 }
 
-bool CodeLoader::lispUpload(QString codeStr, QString editorPath)
+bool CodeLoader::lispUpload(QString codeStr, QString editorPath, bool reduceLisp)
 {
-    VByteArray vb = lispPackImports(codeStr, editorPath);
+    VByteArray vb = lispPackImports(codeStr, editorPath, reduceLisp);
 
     if (vb.isEmpty()) {
         return false;
     }
 
     return lispUpload(vb);
+}
+
+bool CodeLoader::lispUploadFromPath(QString path, bool reduceLisp)
+{
+    QFile f(path);
+    if (f.open(QIODevice::ReadOnly)) {
+        QFileInfo fi(f);
+        VByteArray lispData = lispPackImports(f.readAll(), fi.canonicalPath(), reduceLisp);
+        f.close();
+
+        if (!lispData.isEmpty()) {
+            bool ok = lispErase(lispData.size() + 100);
+            if (ok) {
+                return lispUpload(lispData);
+            }
+        }
+    }
+
+    return false;
 }
 
 bool CodeLoader::lispStream(VByteArray vb, qint8 mode)
@@ -452,13 +553,20 @@ QString CodeLoader::lispRead(QWidget *parent, QString &lispPath)
     };
 
     QString res = "";
+    mAbortDownloadUpload = false;
 
     if (getLispChunk(10, 0, 5, 1500)) {
-        while (lispData.size() < lenLispLast) {
+        while (lispData.size() < lenLispLast && !mAbortDownloadUpload) {
             int dataLeft = lenLispLast - lispData.size();
             if (!getLispChunk(dataLeft > 400 ? 400 : dataLeft, lispData.size(), 5, 1500)) {
                 break;
             }
+
+            emit lispUploadProgress(lispData.size(), lenLispLast);
+        }
+
+        if (mAbortDownloadUpload) {
+            return res;
         }
 
         if (lispData.size() == lenLispLast) {
@@ -700,6 +808,13 @@ QByteArray CodeLoader::packVescPackage(VescPackage pkg)
         data.append(dataRaw);
     }
 
+    if (!pkg.description_md.isEmpty()) {
+        auto dataRaw = pkg.description_md.toUtf8();
+        data.vbAppendString("description_md");
+        data.vbAppendInt32(dataRaw.size());
+        data.append(dataRaw);
+    }
+
     if (!pkg.lispData.isEmpty()) {
         data.vbAppendString("lispData");
         data.vbAppendInt32(pkg.lispData.size());
@@ -709,6 +824,13 @@ QByteArray CodeLoader::packVescPackage(VescPackage pkg)
     if (!pkg.qmlFile.isEmpty()) {
         auto dataRaw = pkg.qmlFile.toUtf8();
         data.vbAppendString("qmlFile");
+        data.vbAppendInt32(dataRaw.size());
+        data.append(dataRaw);
+    }
+
+    if (!pkg.pkgDescQml.isEmpty()) {
+        auto dataRaw = pkg.pkgDescQml.toUtf8();
+        data.vbAppendString("pkgDescQml");
         data.vbAppendInt32(dataRaw.size());
         data.append(dataRaw);
     }
@@ -754,19 +876,34 @@ VescPackage CodeLoader::unpackVescPackage(QByteArray data)
             auto dataRaw = vb.left(len);
             vb.remove(0, len);
             pkg.description = QString::fromUtf8(dataRaw);
+            pkg.loadOk = true;
+        } else if (name == "description_md") {
+            auto len = vb.vbPopFrontInt32();
+            auto dataRaw = vb.left(len);
+            vb.remove(0, len);
+            pkg.description_md = QString::fromUtf8(dataRaw);
+            pkg.loadOk = true;
         } else if (name == "lispData") {
             auto len = vb.vbPopFrontInt32();
             auto dataRaw = vb.left(len);
             vb.remove(0, len);
             pkg.lispData = dataRaw;
+            pkg.loadOk = true;
         } else if (name == "qmlFile") {
             auto len = vb.vbPopFrontInt32();
             auto dataRaw = vb.left(len);
             vb.remove(0, len);
             pkg.qmlFile = QString::fromUtf8(dataRaw);
+            pkg.loadOk = true;
         } else if (name == "qmlIsFullscreen") {
             vb.vbPopFrontInt32(); // Discard length
             pkg.qmlIsFullscreen = vb.vbPopFrontInt8();
+        } else if (name == "pkgDescQml") {
+            auto len = vb.vbPopFrontInt32();
+            auto dataRaw = vb.left(len);
+            vb.remove(0, len);
+            pkg.pkgDescQml = QString::fromUtf8(dataRaw);
+            pkg.loadOk = true;
         } else {
             // Unknown identifier, skip
             auto len = vb.vbPopFrontInt32();
@@ -920,6 +1057,188 @@ bool CodeLoader::downloadPackageArchive()
 
     reply->abort();
     reply->deleteLater();
+
+    return res;
+}
+
+void CodeLoader::abortDownloadUpload()
+{
+    mAbortDownloadUpload = true;
+}
+
+bool CodeLoader::createPackageFromDescription(QString path, VescPackage *pkgRes, bool reduceLisp)
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "Could not open package description file.";
+        return false;
+    }
+
+    QString qmlData = QString::fromUtf8(f.readAll());
+    f.close();
+
+    QQmlEngine *engine = new QQmlEngine(this);
+    QQmlComponent component(engine);
+    component.setData(qmlData.toUtf8(), QUrl());
+    QQuickItem *qmlItem = qobject_cast<QQuickItem*>(component.create());
+
+    if (!qmlItem) {
+        qWarning() << "Loading QML package description failed";
+        qWarning() << component.errorString();
+        engine->deleteLater();
+        return false;
+    }
+
+    VescPackage pkg;
+    pkg.pkgDescQml = qmlData;
+
+    bool result = true;
+    QString pkgOutput = "";
+
+    auto prop = qmlItem->property("pkgName");
+    if (prop.isValid()) {
+        pkg.name = prop.toString();
+        qDebug() << "Package name found:" << pkg.name;
+    }
+
+    prop = qmlItem->property("pkgDescriptionMd");
+    if (prop.isValid()) {
+        auto mdPath = prop.toString();
+
+        if (!mdPath.isEmpty()) {
+            QFile f(mdPath);
+            if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+                qWarning() << "Could not open markdown file.";
+                result = false;
+            }
+
+            QString desc = QString::fromUtf8(f.readAll());
+            f.close();
+
+            qDebug() << "Package description found!";
+            pkg.description_md = desc;
+            pkg.description = Utility::md2html(desc);
+        }
+    }
+
+    prop = qmlItem->property("pkgLisp");
+    if (prop.isValid()) {
+        auto lispPath = prop.toString();
+
+        if (!lispPath.isEmpty()) {
+            QFile f(lispPath);
+            if (f.open(QIODevice::ReadOnly)) {
+                QFileInfo fi(f);
+                pkg.lispData = lispPackImports(f.readAll(), fi.canonicalPath(), reduceLisp);
+
+                // Empty array means an error. Otherwise, lispPackImports() always returns data.
+                if (pkg.lispData.isEmpty()) {
+                    qWarning() << "Errors when processing lisp imports.";
+                    result = false;
+                }
+
+                f.close();
+
+                qDebug() << "Package lisp found and parsed!";
+            } else {
+                qWarning() << "Could not open lisp file.";
+                result = false;
+            }
+        }
+    }
+
+    prop = qmlItem->property("pkgQml");
+    if (prop.isValid()) {
+        auto qmlPath = prop.toString();
+
+        if (!qmlPath.isEmpty()) {
+            QFile f(qmlPath);
+            if (f.open(QIODevice::ReadOnly)) {
+                pkg.qmlFile = f.readAll();
+                f.close();
+                qDebug() << "Package qml found!";
+            } else {
+                qWarning() << "Could not open qml file.";
+                result = false;
+            }
+        }
+    }
+
+    prop = qmlItem->property("pkgQmlIsFullscreen");
+    if (prop.isValid()) {
+        pkg.qmlIsFullscreen = prop.toBool();
+        qDebug() << "QML fullscreen:" << pkg.qmlIsFullscreen;
+    }
+
+    prop = qmlItem->property("pkgOutput");
+    if (prop.isValid()) {
+        pkgOutput = prop.toString();
+    }
+
+    if (pkgOutput.isEmpty()) {
+        qWarning() << "No package output specified";
+        result = false;
+    } else {
+        QFile file(pkgOutput);
+        if (file.open(QIODevice::WriteOnly)) {
+            file.write(packVescPackage(pkg));
+            file.close();
+            qDebug() << "Package saved as" << pkgOutput;
+        } else {
+            qWarning() << QString("Could not open %1 for writing.").arg(pkgOutput);
+            result = false;
+        }
+    }
+
+    engine->deleteLater();
+
+    if (pkgRes != nullptr) {
+        *pkgRes = pkg;
+    }
+
+    return result;
+}
+
+bool CodeLoader::shouldShowPackage(VescPackage pkg)
+{
+    if (!mVesc) {
+        return true;
+    }
+
+    if (!mVesc->isPortConnected()) {
+        return true;
+    }
+
+    return shouldShowPackageFromRxp(pkg, mVesc->getLastFwRxParams());
+}
+
+bool CodeLoader::shouldShowPackageFromRxp(VescPackage pkg, FW_RX_PARAMS rxp, bool *runOk)
+{
+    bool res = true;
+    if (!pkg.pkgDescQml.isEmpty()) {
+        QQmlEngine *engine = new QQmlEngine();
+        QQmlComponent component(engine);
+        component.setData(pkg.pkgDescQml.toUtf8(), QUrl());
+        QQuickItem *qmlItem = qobject_cast<QQuickItem*>(component.create());
+
+        QVariant returnedValue;
+        QMetaObject::invokeMethod(qmlItem,
+                                  "isCompatible",
+                                  Q_RETURN_ARG(QVariant, returnedValue),
+                                  Q_ARG(QVariant, QVariant::fromValue(rxp)));
+
+        engine->deleteLater();
+
+        if (runOk != nullptr) {
+            *runOk = returnedValue.isValid();
+        }
+
+        if (returnedValue.isValid()) {
+            res = returnedValue.toBool();
+        } else {
+            qWarning() << "Failed to run isCompatible from package" << pkg.name;
+        }
+    }
 
     return res;
 }

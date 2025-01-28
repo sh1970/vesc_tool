@@ -117,9 +117,6 @@ Item {
                             var vCells = mVal.v_cells
                             var isBal = mVal.is_balancing
 
-                            //                            var vCells = [3.1, 2.7, 3.3, 3.4, 3.5, 3.4, 3.3, 4.4, 4.1, 4.2]
-                            //                            var isBal = [false, false, false, false, true, true, false, false, false, true]
-
                             var cellNum = vCells.length
                             var cellHeight = (heightBars / cellNum) * 0.6
                             var cellDist = (heightBars / cellNum) * 0.4
@@ -171,15 +168,22 @@ Item {
                                 return
                             }
 
-                            var temps =  [mVal.temp_ic, mVal.temp_hum_sensor].concat(mVal.temps)
+                            var temps =  mVal.temps
                             var tempNum = temps.length
 
-                            var xOfsLeft = valMetrics.width * 4.5
+                            var xOfsLeft = valMetrics.width * 8.5
                             var xOfsRight = valMetrics.width * 8
 
                             var cellHeight = (height / tempNum) * 0.7
                             var cellDist = (height / tempNum) * 0.3
                             var cellWidth = width - xOfsLeft - xOfsRight
+
+                            var tInd = 1
+                            var tLabels = []
+
+                            if (mVal.data_version === 1) {
+                                tLabels = ["IC", "Cell Min", "Cell Max", "Mosfet", "Ambient"]
+                            }
 
                             for (var i = 0;i < tempNum;i++) {
                                 ctx.fillStyle = Utility.getAppHexColor("lightAccent")
@@ -197,10 +201,19 @@ Item {
 
                                 var txtY = i * (cellHeight + cellDist) + cellDist / 2 + cellHeight / 2
 
-                                ctx.fillText("T" + parseFloat(i + 1).toFixed(0),
-                                             valMetrics.width / 2, txtY)
-                                ctx.fillText(parseFloat(temps[i]).toFixed(2) + " °C",
-                                             xOfsLeft + cellW + valMetrics.width / 2, txtY)
+                                if (i < tLabels.length) {
+                                    ctx.fillText(tLabels[i], valMetrics.width / 2, txtY)
+                                } else {
+                                    ctx.fillText("T" + parseFloat(tInd++).toFixed(0),
+                                                 valMetrics.width / 2, txtY)
+                                }
+
+                                var txtTemp = parseFloat(temps[i]).toFixed(2) + " °C"
+                                if (temps[i] <= -280.0) {
+                                    txtTemp = " N/A"
+                                }
+
+                                ctx.fillText(txtTemp, xOfsLeft + cellW + valMetrics.width / 2, txtY)
 
                                 ctx.fillStyle = Qt.rgba(0, 0, 1, 1)
                                 ctx.fillRect(xOfsLeft, i * (cellHeight + cellDist) + cellDist / 2,
@@ -217,13 +230,16 @@ Item {
         }
 
         ColumnLayout {
+            property int textRows: 12
+
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.preferredWidth: isHorizontal ? parent.width/2 : parent.width
             Layout.column:0
             Layout.row: isHorizontal ? 0 : 1
-            Layout.preferredHeight: valMetrics.height * 12 + 20 + menuButton.implicitHeight
+            Layout.preferredHeight: valMetrics.height * textRows + 20 + menuButton.implicitHeight
             spacing: 0
+
             Rectangle {
                 id: textRect
                 color: Utility.getAppHexColor("darkBackground")
@@ -236,7 +252,7 @@ Item {
                 }
 
                 Layout.fillWidth: true
-                Layout.preferredHeight: valMetrics.height * 12 + 20
+                Layout.preferredHeight: valMetrics.height * parent.textRows + 20
                 Layout.alignment: Qt.AlignBottom
 
                 Text {
@@ -338,19 +354,25 @@ Item {
             mVal = val
             mValSet = true
 
+            var cvMin = Math.min(...mVal.v_cells)
+            var cvMax = Math.max(...mVal.v_cells)
+
             valText.text =
-                    "V Tot      : " + parseFloat(val.v_tot).toFixed(2) + " V\n" +
-                    "V Charge   : " + parseFloat(val.v_charge).toFixed(2) + " V\n" +
-                    "I In       : " + parseFloat(val.i_in_ic).toFixed(2) + " A\n" +
-                    "Ah Cnt     : " + parseFloat(val.ah_cnt).toFixed(3) + " Ah\n" +
-                    "Wh Cnt     : " + parseFloat(val.wh_cnt).toFixed(2) + " Wh\n" +
-                    "Power      : " + parseFloat(val.v_tot * val.i_in_ic).toFixed(2) + " W\n" +
-                    "Humidity   : " + parseFloat(val.humidity).toFixed(1) + " %\n" +
-                    "Pressure   : " + parseFloat(val.pressure).toFixed(0) + " Pa\n" +
-                    "Temp Hum   : " + parseFloat(val.temp_hum_sensor).toFixed(1) + " \u00B0C\n" +
-                    "Temp Max   : " + parseFloat(val.temp_cells_highest).toFixed(1) + " \u00B0C\n" +
-                    "SoC        : " + parseFloat(val.soc * 100).toFixed(1) + " %\n" +
-                    "Ah Chg Tot : " + parseFloat(val.ah_cnt_chg_total).toFixed(3) + " Ah"
+                    "Min-Max-Diff : " + parseFloat(cvMin).toFixed(3) + " - " +
+                                        parseFloat(cvMax).toFixed(3) + " - " +
+                                        parseFloat(cvMax - cvMin).toFixed(3) + " V\n" +
+                    "V Tot        : " + parseFloat(val.v_tot).toFixed(2) + " V\n" +
+                    "V Charge     : " + parseFloat(val.v_charge).toFixed(2) + " V\n" +
+                    "I In         : " + parseFloat(val.i_in_ic).toFixed(2) + " A\n" +
+                    "Ah Cnt       : " + parseFloat(val.ah_cnt).toFixed(3) + " Ah\n" +
+                    "Wh Cnt       : " + parseFloat(val.wh_cnt).toFixed(2) + " Wh\n" +
+                    "Power        : " + parseFloat(val.v_tot * val.i_in_ic).toFixed(2) + " W\n" +
+                    "Hum (temp)   : " + parseFloat(val.humidity).toFixed(1) + " %" +
+                                        " (" + parseFloat(val.temp_hum_sensor).toFixed(1) + " \u00B0C)\n" +
+                    "Pressure     : " + parseFloat(val.pressure).toFixed(0) + " Pa\n" +
+                    "SoC          : " + parseFloat(val.soc * 100).toFixed(1) + " %\n" +
+                    "Ah Chg Tot   : " + parseFloat(val.ah_cnt_chg_total).toFixed(3) + " Ah\n" +
+                    "Ah Dis Tot   : " + parseFloat(val.ah_cnt_dis_total).toFixed(3) + " Ah"
 
             cellCanvas.requestPaint()
             tempCanvas.requestPaint()

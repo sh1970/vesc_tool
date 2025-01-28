@@ -61,6 +61,7 @@ public:
     Q_INVOKABLE static void allowScreenRotation(bool enabled);
     Q_INVOKABLE static bool waitSignal(QObject *sender, QString signal, int timeoutMs);
     Q_INVOKABLE static void sleepWithEventLoop(int timeMs);
+    Q_INVOKABLE static bool canUpdateBaudAllBlocking(VescInterface *vesc, int newBaud);
     Q_INVOKABLE static QString detectAllFoc(VescInterface *vesc,
                                             bool detect_can, double max_power_loss, double min_current_in,
                                             double max_current_in, double openloop_rpm, double sl_erpm);
@@ -83,11 +84,12 @@ public:
     static bool createParamParserC(ConfigParams *params, QString configName, QString filename);
     static bool createCompressedConfigC(ConfigParams *params, QString configName, QString filename);
     static uint32_t crc32c(uint8_t *data, uint32_t len);
-    static bool getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params);
-    static bool getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId);
+    static bool getFwVersionBlocking(VescInterface *vesc, FW_RX_PARAMS *params, int timeout = 4000);
+    static bool getFwVersionBlockingCan(VescInterface *vesc, FW_RX_PARAMS *params, int canId, int timeout = 4000);
     Q_INVOKABLE static bool isConnectedToHwVesc(VescInterface *vesc);
     Q_INVOKABLE static FW_RX_PARAMS getFwVersionBlocking(VescInterface *vesc);
     Q_INVOKABLE static FW_RX_PARAMS getFwVersionBlockingCan(VescInterface *vesc, int canId);
+    Q_INVOKABLE static bool pingConnectedDevice(VescInterface *vesc, int timeout);
     Q_INVOKABLE static MC_VALUES getMcValuesBlocking(VescInterface *vesc);
     static bool checkFwCompatibility(VescInterface *vesc);
     Q_INVOKABLE static QVariantList getNetworkAddresses();
@@ -102,6 +104,8 @@ public:
     static void createEnuMatrix(double lat, double lon, double *enuMat);
     static void llhToEnu(const double *iLlh, const double *llh, double *xyz);
     static void enuToLlh(const double *iLlh, const double *xyz, double *llh);
+    static double distLlhToLlh(double lat, double lon, double height,
+                              double lat2, double lon2, double height2);
 
     static bool configCheckCompatibility(int fwMajor, int fwMinor);
     static bool configLoad(VescInterface *vesc, int fwMajor, int fwMinor);
@@ -145,6 +149,10 @@ public:
     Q_INVOKABLE static bool downloadUrlEventloop(QString path, QString dest);
 
     Q_INVOKABLE static QString md2html(QString md);
+
+    Q_INVOKABLE static QByteArray readAllFromFile(const QString &filePath);
+
+    static QByteArray removeFirmwareHeader(QByteArray in);
 
 signals:
 

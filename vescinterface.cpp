@@ -107,6 +107,8 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
 
     mIgnoreCustomConfigs = false;
 
+    mFwSwapDone = false;
+
 #ifdef Q_OS_ANDROID
     QAndroidJniObject activity = QAndroidJniObject::callStaticObjectMethod(
                 "org/qtproject/qt5/android/QtNative", "activity", "()Landroid/app/Activity;");
@@ -234,6 +236,19 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
     });
 
+    mTimerConfigUpdate = new QTimer(this);
+    mTimerConfigUpdate->setInterval(1000);
+    mTimerConfigUpdate->start();
+    connect(mTimerConfigUpdate, &QTimer::timeout, [this]() {
+        if (isPortConnected()) {
+            for (int i = 0;i < mCustomConfigs.size();i++) {
+                if (mCustomConfigs.at(i)->updateCnt() == 0) {
+                    mCommands->customConfigGet(i, false);
+                }
+            }
+        }
+    });
+
     mUdpServer = new UdpServerSimple(this);
     mUdpServer->setUsePacket(true);
     connect(mUdpServer->packet(), &Packet::packetReceived, [this](QByteArray &packet) {
@@ -301,6 +316,21 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
         }
         mSettings.endArray();
     }
+
+    {
+        int size = mSettings.beginReadArray("lastFwUuids");
+        for (int i = 0; i < size; ++i) {
+            mSettings.setArrayIndex(i);
+            QString uuidLocal = mSettings.value("uuidLocal", "").toString().toUpper();
+            QString uuidCan = mSettings.value("uuidCan", "").toString().toUpper();
+            int canId = mSettings.value("canId", -1).toInt();
+
+            if (!uuidLocal.isEmpty() && !uuidCan.isEmpty() && canId >= 0) {
+                mLastFwUuids[uuidLocal] = qMakePair(uuidCan, canId);
+            }
+        }
+        mSettings.endArray();
+    }
     
     QLocale systemLocale;
     bool useImperialByDefault = systemLocale.measurementSystem() == QLocale::ImperialSystem;
@@ -357,6 +387,12 @@ VescInterface::VescInterface(QObject *parent) : QObject(parent)
                         "chance of permanently damaging the motor controller. Only change this setting if you know "
                         "exactly what you are doing! In general ABS overcurrent faults indicate that something is "
                         "wrong with the configuration or that the setup is pushed beyond reasonable limits.");
+        }
+
+        if (mMcConfig->hasParam("foc_overmod_factor") && mMcConfig->getParamDouble("foc_overmod_factor") >= 1.16) {
+            notes += tr("<b>Overmodulation Check</b><br>"
+                        "The FOC overmodulation factor is set to more than 1.15, which causes high distortion for minimal "
+                        "gain. It is best to leave it at 1.15 or less, which is similar to BLDC commutation.");
         }
 
         if (!notes.isEmpty()) {
@@ -733,6 +769,21 @@ void VescInterface::storeSettings()
             mSettings.setValue("customconf", i.value().customconf_xml_compressed);
             mSettings.setValue("name", i.value().name);
             ind++;
+        }
+        mSettings.endArray();
+    }
+
+    mSettings.remove("lastFwUuids");
+    {
+        mSettings.beginWriteArray("lastFwUuids");
+        QMapIterator<QString, QPair<QString, int> > i(mLastFwUuids);
+        int ind = 0;
+        while (i.hasNext()) {
+            i.next();
+            mSettings.setArrayIndex(ind++);
+            mSettings.setValue("uuidLocal", i.key());
+            mSettings.setValue("uuidCan", i.value().first);
+            mSettings.setValue("canId", i.value().second);
         }
         mSettings.endArray();
     }
@@ -1346,8 +1397,10 @@ bool VescInterface::fwEraseBootloader(bool fwdCan)
     return true;
 }
 
-bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fwdCan, bool isLzo)
+bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fwdCan, bool isLzo, bool autoDisconnect)
 {
+    newFirmware = Utility::removeFirmwareHeader(newFirmware);
+
     mIsLastFwBootloader = isBootloader;
     mFwUploadProgress = 0.0;
     mCancelFwUpload = false;
@@ -1381,7 +1434,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
             bool ignoreBefore = mIgnoreCanChange;
             mIgnoreCanChange = true;
 
-            for (auto d: devs) {
+            foreach (auto d, devs) {
                 mCommands->setSendCan(true, d);
                 FW_RX_PARAMS fwParamsCan;
                 Utility::getFwVersionBlocking(this, &fwParamsCan);
@@ -1655,7 +1708,7 @@ bool VescInterface::fwUpload(QByteArray &newFirmware, bool isBootloader, bool fw
     if (!isBootloader) {
         mCommands->jumpToBootloader(fwdCan, mLastFwParams.hwType, mLastFwParams.hw);
         Utility::sleepWithEventLoop(500);
-        disconnectPort();
+        if (autoDisconnect) disconnectPort();
     }
 
     return true;
@@ -3252,6 +3305,8 @@ void VescInterface::timerSlot()
             }
 
             mDeserialFailedMessageShown = false;
+            mPacket->resetState();
+            mFwSwapDone = false;
         }
 
         emit portConnectedChanged();
@@ -3411,15 +3466,45 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
     mUuidStr.replace(" ", "");
     mFwSupportsConfiguration = false;
 
+    if (!mCommands->getSendCan()) {
+        mUuidStrLocal = mUuidStr;
+    }
+
+    if (mSettings.value("reconnectLastCan", true).toBool() &&
+            !mUuidStrLocal.isEmpty() && mLastFwUuids.contains(mUuidStrLocal)) {
+
+        auto pair = mLastFwUuids[mUuidStrLocal];
+
+        if (pair.second >= 0 && pair.first != mUuidStr && !mFwSwapDone) {
+            FW_RX_PARAMS pRx;
+            bool ok = Utility::getFwVersionBlockingCan(this, &pRx, pair.second, 1500);
+            if (ok && Utility::uuid2Str(pRx.uuid, false) == pair.first) {
+                mCommands->setSendCan(true, pair.second);
+                return;
+            }
+        }
+    }
+
+    if (!mUuidStrLocal.isEmpty()) {
+        int canId = -1;
+        if (mCommands->getSendCan()) {
+            canId = mCommands->getCanSendId();
+        }
+
+        mLastFwUuids[mUuidStrLocal] = qMakePair(mUuidStr, canId);
+    }
+
+    mFwSwapDone = true;
+
 #ifdef HAS_BLUETOOTH
     if (mBleUart->isConnected()) {
         if (params.isPaired && !hasPairedUuid(mUuidStr)) {
             disconnectPort();
             emitMessageDialog("Pairing",
-                              "This VESC is not paired to your local version of VESC Tool. You can either "
+                              "This device is not paired to your local version of VESC Tool. You can either "
                               "add the UUID to the pairing list manually, or connect over USB and set the app "
                               "pairing flag to false for this VESC. Then you can pair to this version of VESC "
-                              "tool, or leave the VESC unpaired.",
+                              "tool, or leave the device unpaired.",
                               false, false);
             return;
         }
@@ -3682,17 +3767,17 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
         updateFwRx(false);
         mFwRetries = 0;
         disconnectPort();
-        emit messageDialog(tr("Error"), tr("The firmware on the connected VESC is too old. Please"
-                                           " update it using a programmer."), false, false);
+        emit messageDialog(tr("Error"), tr("The firmware on the connected device is too old. Please "
+                                           "update it using a programmer."), false, false);
     } else if (fw_connected > highest_supported) {
         mCommands->setLimitedMode(true);
         updateFwRx(true);
         if (!wasReceived) {
-            emit messageDialog(tr("Warning"), tr("The connected VESC has newer firmware than this version of"
-                                                " VESC Tool supports. It is recommended that you update VESC "
-                                                " Tool to the latest version. Alternatively, the firmware on"
-                                                " the connected VESC can be downgraded in the firmware page."
-                                                " Until then, limited communication mode will be used."), false, false);
+            emit messageDialog(tr("Warning"), tr("The connected device has newer firmware than this version of "
+                                                "VESC Tool supports. It is recommended that you update VESC "
+                                                "Tool to the latest version. Alternatively, the firmware on "
+                                                "the connected device can be downgraded in the firmware page. "
+                                                "Until then, limited communication mode will be used."), false, false);
         }
     } else if (!fwPairs.contains(fw_connected)) {
         if (fw_connected >= qMakePair(1, 1)) {
@@ -3700,21 +3785,24 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
             updateFwRx(true);
             if (!wasReceived) {
                 if (mFwSupportsConfiguration) {
-                    if (params.hwType == HW_TYPE_VESC) {
-                        emit messageDialog(tr("Warning"), tr("The connected VESC has old, but mostly compatible firmware. This is fine if "
-                                                             "your setup works properly.<br><br>"
-                                                             "Check out the firmware changelog (from the help menu) to decide if you want to "
-                                                             "use some of the new features that have been added after your firmware version. "
-                                                             "Keep in mind that you only should upgrade firmware if you have time to test "
-                                                             "it after the upgrade and carefully make sure that everything works as expected."),
+                    if (params.hwType == HW_TYPE_VESC && mSettings.value("showFwUpdateAvailable", true).toBool()) {
+                        emit messageDialog(tr("Firmware Update Available"),
+                                           tr("The connected VESC-based ESC has old, but mostly compatible firmware. This is "
+                                              "fine if your setup works properly.<br><br>"
+                                              "Check out the firmware changelog (from the help menu or firmware page) to decide "
+                                              "if you want to use some of the new features that have been added after your "
+                                              "firmware version was released. Keep in mind that you only should upgrade firmware "
+                                              "if you have time to test it after the upgrade and carefully make sure that "
+                                              "everything works as expected.<br><br>"
+                                              "This message can be disabled from the settings."),
                                            false, false);
                     }
                 } else {
                     if (params.hwType == HW_TYPE_VESC) {
-                        emit messageDialog(tr("Warning"), tr("The connected VESC has too old firmware. Since the"
-                                                             " connected VESC has firmware with bootloader support, it can be"
-                                                             " updated from the Firmware page."
-                                                             " Until then, limited communication mode will be used."), false, false);
+                        emit messageDialog(tr("Warning"), tr("The connected VESC-based ESC has too old firmware. Since the "
+                                                             "connected VESC has firmware with bootloader support, it can be "
+                                                             "updated from the Firmware page. "
+                                                             "Until then, limited communication mode will be used."), false, false);
                     }
                 }
             }
@@ -3723,16 +3811,16 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
             mFwRetries = 0;
             disconnectPort();
             if (!wasReceived) {
-                emit messageDialog(tr("Error"), tr("The firmware on the connected VESC is too old. Please"
-                                                   " update it using a programmer."), false, false);
+                emit messageDialog(tr("Error"), tr("The firmware on the connected device is too old. Please "
+                                                   "update it using a programmer."), false, false);
             }
         }
     } else {
         updateFwRx(true);
         if (fw_connected < highest_supported) {
             if (!wasReceived) {
-                emit messageDialog(tr("Warning"), tr("The connected VESC has compatible, but old"
-                                                    " firmware. It is recommended that you update it."), false, false);
+                emit messageDialog(tr("Warning"), tr("The connected device has compatible, but old "
+                                                    "firmware. It is recommended that you update it."), false, false);
             }
         }
 
@@ -3772,8 +3860,8 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
 
     if (params.isTestFw > 0 && !VT_IS_TEST_VERSION) {
         emitMessageDialog("Test Firmware",
-                          "The connected VESC has test firmware, and this is not a test build of VESC Tool. You should "
-                          "update the firmware urgently, as this is not a safe situation.",
+                          "The connected VESC-based device has test firmware and this is not a test build of VESC Tool. "
+                          "You should update the firmware urgently, this may not be a safe situation.",
                           false, false);
     }
 
@@ -3812,13 +3900,13 @@ void VescInterface::fwVersionReceived(FW_RX_PARAMS params)
                     auto confData = f.readAll();
                     f.close();
 
-                    if (!mCustomConfigs.last()->loadCompressedParamsXml(confData)) {
-                        readConfigsOk = false;
-                        break;
+                    if (mCustomConfigs.last()->loadCompressedParamsXml(confData)) {
+                        emitStatusMessage(QString("Got cached %1").arg(mCustomConfigs.last()->getLongName("hw_name")), true);
+                        continue;
+                    } else {
+                        mCustomConfigs.last()->deleteLater();
+                        mCustomConfigs.removeLast();
                     }
-
-                    emitStatusMessage(QString("Got cached %1").arg(mCustomConfigs.last()->getLongName("hw_name")), true);
-                    continue;
                 }
             }
 
@@ -4087,8 +4175,8 @@ void VescInterface::mcconfUpdated()
                                   "version of VESC Tool. If it does not work properly you should run the motor wizard "
                                   "again or re-measure the parameters manually.\n\n"
                                   ""
-                                  "The main reason for this is that the motor resistance and induction values are defined "
-                                  "differently after firmware 5.03, so old configs will not run properly.",
+                                  "When updating firmware it is always best to reset to the default configuration and "
+                                  "run the detection and/or wizards again.",
                                   false);
             }
         }
@@ -4116,6 +4204,16 @@ void VescInterface::customConfigRx(int confId, QByteArray data)
     }
 }
 
+bool VescInterface::showFwUpdateAvailable() const
+{
+    return mSettings.value("showFwUpdateAvailable", true).toBool();
+}
+
+void VescInterface::setShowFwUpdateAvailable(bool set)
+{
+    mSettings.setValue("showFwUpdateAvailable", set);
+}
+
 bool VescInterface::ignoreCustomConfigs() const
 {
     return mIgnoreCustomConfigs;
@@ -4124,6 +4222,26 @@ bool VescInterface::ignoreCustomConfigs() const
 void VescInterface::setIgnoreCustomConfigs(bool newIgnoreCustomConfigs)
 {
     mIgnoreCustomConfigs = newIgnoreCustomConfigs;
+}
+
+bool VescInterface::reconnectLastCan()
+{
+    return mSettings.value("reconnectLastCan", true).toBool();
+}
+
+void VescInterface::setReconnectLastCan(bool set)
+{
+    mSettings.setValue("reconnectLastCan", set);
+}
+
+bool VescInterface::scanCanOnConnect()
+{
+    return mSettings.value("scanCanOnConnect", true).toBool();
+}
+
+void VescInterface::setScanCanOnConnect(bool set)
+{
+    mSettings.setValue("scanCanOnConnect", set);
 }
 
 int VescInterface::getLastTcpHubPort() const

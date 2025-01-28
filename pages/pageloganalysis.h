@@ -57,6 +57,7 @@ private slots:
     void on_centerButton_clicked();
     void on_logListOpenButton_clicked();
     void on_logListRefreshButton_clicked();
+    void on_logListUpButton_clicked();
     void on_logTable_cellDoubleClicked(int row, int column);
     void on_vescLogListRefreshButton_clicked();
     void on_vescLogListOpenButton_clicked();
@@ -115,6 +116,8 @@ private:
 
     struct SelectoData {
         QStringList dataLabels;
+        QStringList checkedY1Boxes;
+        QStringList checkedY2Boxes;
         int scrollPos;
     };
 
@@ -174,7 +177,7 @@ private:
     void logListRefresh();
     void addDataItem(QString name, bool hasScale = true,
                      double scaleStep = 0.1, double scaleMax = 99.99);
-    void openLog(QByteArray data);
+    void openLog(QString name, QByteArray data);
     void generateMissingEntries();
 
     void storeSelection();

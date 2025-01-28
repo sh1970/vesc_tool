@@ -25,6 +25,7 @@
 #include <QTimer>
 #include <QByteArray>
 #include <QList>
+#include <QVariantList>
 #include <QTcpSocket>
 #include <QUdpSocket>
 #include <QSettings>
@@ -129,7 +130,8 @@ public:
     // Firmware Updates
     bool fwEraseNewApp(bool fwdCan, quint32 fwSize);
     bool fwEraseBootloader(bool fwdCan);
-    bool fwUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false, bool isLzo = true);
+    bool fwUpload(QByteArray &newFirmware, bool isBootloader = false, bool fwdCan = false, bool isLzo = true, bool autoDisconnect = true);
+    Q_INVOKABLE bool fwUpdate(QByteArray newFirmware) { return fwUpload(newFirmware, false, false, true, false); }
     Q_INVOKABLE void fwUploadCancel();
     Q_INVOKABLE double getFwUploadProgress();
     Q_INVOKABLE QString getFwUploadStatus();
@@ -265,6 +267,15 @@ public:
     bool ignoreCustomConfigs() const;
     void setIgnoreCustomConfigs(bool newIgnoreCustomConfigs);
 
+    Q_INVOKABLE bool reconnectLastCan();
+    Q_INVOKABLE void setReconnectLastCan(bool set);
+
+    Q_INVOKABLE bool scanCanOnConnect();
+    Q_INVOKABLE void setScanCanOnConnect(bool set);
+
+    Q_INVOKABLE bool showFwUpdateAvailable() const;
+    Q_INVOKABLE void setShowFwUpdateAvailable(bool set);
+
 signals:
     void statusMessage(const QString &msg, bool isGood);
     void messageDialog(const QString &title, const QString &msg, bool isGood, bool richText);
@@ -342,6 +353,7 @@ private:
     TcpServerSimple *mTcpServer;
     UdpServerSimple *mUdpServer;
     QTimer *mTimerBroadcast;
+    QTimer *mTimerConfigUpdate;
     QVariantList mTcpHubDevs;
 
     ConfigParams *mMcConfig;
@@ -368,6 +380,7 @@ private:
     QPair<int, int> mFwPair;
     QString mHwTxt;
     QString mUuidStr;
+    QString mUuidStrLocal;
     bool mIsUploadingFw;
     bool mIsLastFwBootloader;
     bool mFwSupportsConfiguration;
@@ -453,6 +466,8 @@ private:
     QVector<int> mCanDevsLast;
 
     FW_RX_PARAMS mLastFwParams;
+    QMap<QString, QPair<QString, int> > mLastFwUuids;
+    bool mFwSwapDone;
 
     // Other settings
     bool mUseImperialUnits;

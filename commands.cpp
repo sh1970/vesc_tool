@@ -317,7 +317,26 @@ void Commands::processPacket(QByteArray data)
 
                 if (mCheckNextMcConfig) {
                     mCheckNextMcConfig = false;
-                    emit mcConfigCheckResult(mMcConfig->checkDifference(&mMcConfigLast));
+                    auto diff = mMcConfig->checkDifference(&mMcConfigLast);
+
+                    // Kind of a hack: Remove offsets from check if they are not supposed
+                    // to be updated.
+                    if (mMcConfig->hasParam("foc_offsets_cal_mode") &&
+                        !(mMcConfig->getParamInt("foc_offsets_cal_mode") & (1 << 1))) {
+                        diff.removeAll("foc_offsets_current__0");
+                        diff.removeAll("foc_offsets_current__1");
+                        diff.removeAll("foc_offsets_current__2");
+
+                        diff.removeAll("foc_offsets_voltage__0");
+                        diff.removeAll("foc_offsets_voltage__1");
+                        diff.removeAll("foc_offsets_voltage__2");
+
+                        diff.removeAll("foc_offsets_voltage_undriven__0");
+                        diff.removeAll("foc_offsets_voltage_undriven__1");
+                        diff.removeAll("foc_offsets_voltage_undriven__2");
+                    }
+
+                    emit mcConfigCheckResult(diff);
                 }
             } else {
                 emit deserializeConfigFailed(true, false);
@@ -729,6 +748,10 @@ void Commands::processPacket(QByteArray data)
             val.pressure = vb.vbPopFrontDouble16(1e-1);
         }
 
+        if (vb.size() >= 1) {
+            val.data_version = vb.vbPopFrontUint8();
+        }
+
         val.updateTimeStamp();
 
         emit bmsValuesRx(val);
@@ -1100,6 +1123,11 @@ void Commands::processPacket(QByteArray data)
             samples.append(vb.vbPopFrontDouble64Auto());
         }
         emit logSamples(fieldStart, samples);
+    } break;
+
+    case COMM_CAN_UPDATE_BAUD_ALL: {
+        auto ok = vb.vbPopFrontInt8();
+        emit canUpdateBaudRx(ok);
     } break;
 
     default:
@@ -2253,6 +2281,15 @@ void Commands::fileRemove(QString path)
     VByteArray vb;
     vb.vbAppendUint8(COMM_FILE_REMOVE);
     vb.vbAppendString(path);
+    emitData(vb);
+}
+
+void Commands::canUpdateBaudAll(int newBaud, int delayMs)
+{
+    VByteArray vb;
+    vb.vbAppendUint8(COMM_CAN_UPDATE_BAUD_ALL);
+    vb.vbAppendInt16(newBaud);
+    vb.vbAppendInt16(delayMs);
     emitData(vb);
 }
 
